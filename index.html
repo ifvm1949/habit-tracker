@@ -1,0 +1,985 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#ffffff">
+    <title>Tick Daily</title>
+    <style>
+        :root {
+            --bg-color: #ffffff;
+            --text-color: #000000;
+            --sub-text: #888888;
+            --border-color: #f0f0f0;
+            --modal-bg: #ffffff;
+            --input-border: #eeeeee;
+            --checkbox-border: #000000;
+            --checkbox-bg: #000000;
+            --progress-bg: #eeeeee;
+            --light-gray: #f5f5f5;
+        }
+        body.dark-mode {
+            --bg-color: #121212;
+            --text-color: #f0f0f0;
+            --sub-text: #999999;
+            --border-color: #333333;
+            --modal-bg: #1e1e1e;
+            --input-border: #444444;
+            --checkbox-border: #ffffff;
+            --checkbox-bg: #ffffff;
+            --progress-bg: #333333;
+            --light-gray: #2a2a2a;
+        }
+        html, body { background: var(--bg-color); width: 100%; height: 100%; overflow: hidden; transition: background 0.3s; }
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; touch-action: manipulation; cursor: pointer; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+        .app-container { width: 100%; max-width: 390px; height: 100vh; margin: 0 auto; background: var(--bg-color); display: flex; flex-direction: column; position: relative; transition: background 0.3s; }
+
+        .header { display: flex; justify-content: space-between; align-items: flex-start; padding: 20px; flex-shrink: 0; padding-top: max(20px, env(safe-area-inset-top)); background: var(--bg-color); z-index: 5; transition: background 0.3s; }
+        .header-left { display: flex; align-items: center; gap: 10px; }
+        .menu-icon { font-size: 28px; font-weight: 300; color: var(--text-color); cursor: pointer; padding: 4px; line-height: 0.8; user-select: none; background: transparent; border: none; transition: opacity 0.2s; }
+        .menu-icon:active { opacity: 0.5; }
+        .header-title { font-size: 28px; font-weight: 700; color: var(--text-color); transition: color 0.3s; }
+        .header-sub { font-size: 13px; color: var(--sub-text); margin-top: 2px; transition: color 0.3s; }
+        .header-btn { width: 34px; height: 34px; border-radius: 50%; border: 1.5px solid var(--text-color); background: transparent; color: var(--text-color); display: flex; justify-content: center; align-items: center; font-size: 24px; font-weight: 300; cursor: pointer; line-height: 0; transition: all 0.3s; }
+
+        .view-today { flex: 1; display: flex; flex-direction: column; padding: 0 20px; overflow-y: auto; background: var(--bg-color); transition: background 0.3s; }
+        .empty-state { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .empty-num { font-size: 130px; font-weight: 200; color: var(--text-color); transition: color 0.3s; line-height: 1; }
+        .empty-text { font-size: 16px; color: var(--sub-text); margin-top: 10px; margin-bottom: 40px; transition: color 0.3s; }
+        .btn-start { background: var(--text-color); color: var(--bg-color); padding: 16px 40px; border-radius: 30px; font-size: 16px; font-weight: 600; border: none; cursor: pointer; transition: all 0.3s; }
+
+        .list-state { flex: 1; display: none; flex-direction: column; padding-bottom: 20px; }
+        .stats-banner { display: flex; justify-content: space-between; padding: 15px 0; margin-bottom: 10px; border-bottom: 1px solid var(--border-color); color: var(--sub-text); font-size: 13px; transition: all 0.3s; }
+        .stats-item { display: flex; align-items: center; gap: 6px; }
+        .stats-item b { color: var(--text-color); font-size: 15px; transition: color 0.3s; }
+        .progress-row { display: flex; align-items: center; margin-bottom: 20px; }
+        .progress-text { font-size: 14px; width: 35px; color: var(--text-color); font-weight: 500; transition: color 0.3s; }
+        .progress-bg { flex: 1; height: 4px; background: var(--progress-bg); border-radius: 2px; overflow: hidden; transition: background 0.3s; }
+        .progress-fill { height: 100%; background: var(--text-color); transition: background 0.3s; }
+
+        .task-group { margin-top: 15px; }
+        .task-group-title { font-size: 14px; font-weight: 600; color: var(--sub-text); margin-bottom: 10px; transition: color 0.3s; }
+        .task-group-divider { height: 1px; background: var(--border-color); margin-bottom: 15px; transition: background 0.3s; }
+        .task-group-empty { text-align: center; color: #ccc; padding: 10px 0; font-size: 13px; }
+
+        .habit-item { display: flex; justify-content: space-between; align-items: center; padding: 16px 0; border-bottom: 1px solid var(--border-color); transition: border 0.3s; }
+        .habit-left { display: flex; align-items: center; gap: 15px; cursor: pointer; }
+        .habit-icon { font-size: 18px; }
+        .habit-name { font-size: 16px; font-weight: 500; color: var(--text-color); transition: color 0.3s; }
+        .habit-desc { font-size: 13px; color: var(--sub-text); margin-top: 2px; transition: color 0.3s; }
+        .habit-right { display: flex; align-items: center; gap: 12px; }
+        .checkbox { width: 24px; height: 24px; border: 1.5px solid var(--checkbox-border); border-radius: 50%; display: flex; justify-content: center; align-items: center; transition: all 0.3s; }
+        .checkbox.active { background: var(--checkbox-border); }
+        .check-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--bg-color); display: none; transition: background 0.3s; }
+        .checkbox.active .check-dot { display: block; }
+        .delete-btn { width: 20px; height: 20px; border-radius: 50%; background: var(--light-gray); color: #666; font-size: 14px; display: flex; justify-content: center; align-items: center; cursor: pointer; transition: background 0.3s; }
+
+        .view-calendar { flex: 1; display: none; flex-direction: column; padding: 20px; overflow-y: auto; background: var(--bg-color); transition: background 0.3s; }
+        .cal-header { display: flex; justify-content: center; align-items: center; padding: 0 0 20px 0; gap: 5px; }
+        .cal-arrow-box { padding: 15px 20px; font-size: 24px; font-weight: 300; color: var(--text-color); cursor: pointer; user-select: none; transition: color 0.3s; }
+        .cal-title { font-size: 18px; font-weight: 600; color: var(--text-color); min-width: 120px; text-align: center; transition: color 0.3s; }
+        .cal-week { display: grid; grid-template-columns: repeat(7, 1fr); margin-bottom: 15px; text-align: center; }
+        .cal-week span { font-size: 12px; font-weight: 600; color: var(--text-color); transition: color 0.3s; }
+        .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); row-gap: 10px; }
+        .cal-day { aspect-ratio: 1; display: flex; justify-content: center; align-items: center; }
+        .cal-inner { position: relative; width: 34px; height: 34px; display: flex; justify-content: center; align-items: center; border-radius: 50%; }
+        .cal-date-num { font-size: 14px; font-weight: 400; color: #d0d0d0; }
+        .cal-border-placeholder { position: absolute; width: 100%; height: 100%; border: 1px solid var(--border-color); border-radius: 8px; transition: border 0.3s; }
+        .cal-dot { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 2px solid var(--checkbox-border); border-radius: 50%; background: transparent; z-index: 10; display: none; transition: border 0.3s; }
+        .cal-day.has-dot .cal-date-num { color: transparent; }
+        .cal-day.has-dot .cal-border-placeholder { border-color: transparent; }
+        .cal-day.has-dot .cal-dot { display: block; }
+
+        .long-term-container { margin-top: 30px; padding-top: 20px; border-top: 1px solid var(--border-color); transition: border 0.3s; }
+        .long-term-empty { text-align: center; color: var(--sub-text); padding: 20px 0; font-size: 14px; transition: color 0.3s; }
+        .project-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border-color); cursor: pointer; transition: border 0.3s; }
+        .project-left { display: flex; align-items: center; gap: 12px; }
+        .project-icon { font-size: 18px; }
+        .project-name { font-size: 16px; font-weight: 500; color: var(--text-color); transition: color 0.3s; }
+        .project-right { display: flex; align-items: center; gap: 10px; }
+        .project-days { font-size: 14px; color: var(--sub-text); transition: color 0.3s; }
+
+        .bottom-nav { display: flex; background: var(--bg-color); border-top: 1px solid var(--border-color); height: 50px; flex-shrink: 0; padding-bottom: env(safe-area-inset-bottom); z-index: 5; transition: all 0.3s; }
+        .nav-item { flex: 1; display: flex; justify-content: center; align-items: center; font-size: 16px; font-weight: 500; color: var(--sub-text); cursor: pointer; border-top: 3px solid transparent; transition: color 0.3s; }
+        .nav-item.active { color: var(--text-color); border-top-color: var(--text-color); }
+
+        .modal-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; z-index: 999; }
+        .modal-box { background: var(--modal-bg); width: 85%; max-width: 320px; padding: 30px 24px; border-radius: 16px; box-shadow: 0 15px 40px rgba(0,0,0,0.15); display: flex; flex-direction: column; gap: 15px; align-items: flex-start; position: relative; transition: background 0.3s; }
+        .modal-close-btn { position: absolute; top: 12px; right: 12px; width: 28px; height: 28px; border-radius: 50%; background: var(--light-gray); border: none; font-size: 14px; color: var(--sub-text); display: flex; justify-content: center; align-items: center; cursor: pointer; transition: all 0.3s; }
+        .modal-title { font-size: 20px; font-weight: 600; color: var(--text-color); width: 100%; text-align: center; margin-top: 5px; margin-bottom: 15px; transition: color 0.3s; }
+        .modal-input { width: 100%; border: 1.5px solid var(--input-border); border-radius: 12px; padding: 14px; font-size: 16px; outline: none; box-sizing: border-box; background: var(--modal-bg); color: var(--text-color); transition: all 0.3s; }
+        .modal-input:focus { border-color: var(--text-color); }
+        .modal-btns { display: flex; justify-content: center; width: 100%; margin-top: 5px; }
+        .modal-btn-save { width: 80%; padding: 12px 0; border-radius: 30px; border: none; font-size: 16px; font-weight: 600; cursor: pointer; text-align: center; background: var(--text-color); color: var(--bg-color); transition: all 0.3s; }
+
+        .days-spinner { display: flex; align-items: center; gap: 10px; padding: 5px 0; width: 100%; justify-content: flex-start; }
+        .spinner-btn { width: 34px; height: 34px; border-radius: 50%; border: 1.5px solid var(--text-color); background: transparent; font-size: 18px; line-height: 0; cursor: pointer; display: flex; justify-content: center; align-items: center; transition: border 0.3s; }
+        .days-input { width: 60px; text-align: center; font-weight: 600; font-size: 18px; border: 1.5px solid var(--input-border); border-radius: 8px; padding: 8px 0; outline: none; margin: 0; background: var(--modal-bg); color: var(--text-color); transition: all 0.3s; }
+        .days-input:focus { border-color: var(--text-color); }
+        input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+        .modal-delete-btn { width: 100%; padding: 12px 0; border-radius: 30px; border: none; background: #fff4f4; color: #ff4d4f; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 5px; }
+
+        .color-options-container { display: flex; flex-wrap: wrap; gap: 8px; padding-top: 5px; }
+        .color-option { width: 30px; height: 30px; border-radius: 50%; border: 2px solid transparent; cursor: pointer; transition: all 0.1s; }
+        .color-option.active { border: 2px solid var(--text-color); transform: scale(1.15); transition: border 0.3s; }
+        #projectOptionList { width: 100%; border-bottom: 1px solid var(--border-color); padding-bottom: 5px; margin-bottom: 5px; transition: border 0.3s; }
+        .project-option { display: flex; justify-content: space-between; align-items: center; padding: 14px 0; border-bottom: 1px solid var(--border-color); color: var(--sub-text); cursor: pointer; font-size: 15px; transition: 0.2s; transition: border 0.3s; }
+        .project-option:last-child { border-bottom: none; }
+        .project-option.selected { color: var(--text-color); font-weight: 500; }
+        .project-option .check-mark { display: none; font-size: 16px; font-weight: 600; color: var(--text-color); }
+        .project-option.selected .check-mark { display: block; }
+
+        .custom-confirm { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; z-index: 1000; }
+        .confirm-box { background: var(--modal-bg); width: 80%; max-width: 300px; padding: 30px 20px; border-radius: 16px; box-shadow: 0 15px 40px rgba(0,0,0,0.15); display: flex; flex-direction: column; gap: 20px; position: relative; transition: background 0.3s; }
+        .confirm-title { font-size: 18px; font-weight: 600; color: var(--text-color); text-align: center; margin-top: 15px; transition: color 0.3s; }
+        .confirm-text { font-size: 15px; color: var(--sub-text); text-align: center; line-height: 1.4; transition: color 0.3s; }
+        .confirm-btns { display: flex; justify-content: center; margin-top: 5px; }
+        .confirm-btn { width: 80%; padding: 12px 0; border-radius: 30px; border: none; font-size: 16px; font-weight: 600; cursor: pointer; text-align: center; }
+        .confirm-btn.confirm { background: var(--text-color); color: var(--bg-color); transition: all 0.3s; }
+
+        #settingsModal .modal-box { position: absolute; top: 0; left: 0; width: 100%; height: 100%; max-width: 100%; border-radius: 0; padding: 40px 24px; background: var(--modal-bg); display: flex; flex-direction: column; align-items: center; transition: background 0.3s; }
+        #settingsModal .modal-close-btn { top: 20px; right: 20px; width: 34px; height: 34px; font-size: 16px; }
+        .profile-section { display: flex; flex-direction: column; align-items: center; width: 100%; margin-top: 20px; }
+        .avatar-wrapper { width: 100px; height: 100px; border-radius: 50%; overflow: hidden; position: relative; background: var(--light-gray); border: 2px solid var(--border-color); cursor: pointer; display: flex; justify-content: center; align-items: center; transition: all 0.3s; }
+        .avatar-wrapper img { width: 100%; height: 100%; object-fit: cover; display: none; }
+        .avatar-wrapper img.loaded { display: block; }
+        .avatar-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.4); color: #fff; display: flex; justify-content: center; align-items: center; font-size: 28px; opacity: 0; transition: 0.2s; }
+        .avatar-wrapper:active .avatar-overlay { opacity: 1; }
+        .profile-name { margin-top: 15px; font-size: 20px; font-weight: 600; color: var(--text-color); padding: 5px 10px; border-radius: 8px; outline: none; text-align: center; border: 1px solid transparent; transition: 0.2s; }
+        .profile-name:focus { border-color: var(--border-color); background: var(--light-gray); }
+        .profile-name:empty:before { content: '点击输入名字'; color: #ccc; }
+        .settings-list { width: 100%; margin-top: 30px; border-top: 1px solid var(--border-color); transition: border 0.3s; }
+        .settings-item { padding: 18px 0; border-bottom: 1px solid var(--border-color); font-size: 15px; color: var(--text-color); width: 100%; text-align: left; transition: 0.2s; transition: all 0.3s; }
+        .settings-item:active { opacity: 0.5; }
+        .settings-item.danger { color: #ff4d4f; }
+        .settings-item.sub { color: var(--sub-text); }
+        .settings-item .btn-small { background: var(--light-gray); color: var(--text-color); padding: 6px 12px; border-radius: 30px; border: 1px solid var(--border-color); float: right; margin-top: -4px; font-size: 13px; transition: 0.2s; }
+        .settings-item .btn-small:active { opacity: 0.5; }
+    </style>
+</head>
+<body>
+<div class="app-container" id="app">
+    <div class="header" id="mainHeader">
+        <div class="header-left">
+            <div class="menu-icon" onclick="clickAction('toggleSettings')">☰</div>
+            <div>
+                <div class="header-title" id="headerTitle">今日</div>
+                <div class="header-sub" id="headerSub"></div>
+            </div>
+        </div>
+        <div class="header-btn" onclick="clickAction('add')">+</div>
+    </div>
+    
+    <div class="view-today" id="todayView">
+        <div class="empty-state" id="emptyState">
+            <div class="empty-num">1</div>
+            <div class="empty-text">0 个习惯</div>
+            <div class="btn-start" onclick="clickAction('add')">开始你的第一个</div>
+        </div>
+        <div class="list-state" id="listState">
+            <div class="stats-banner" id="statsBanner">
+                <div class="stats-item">📅 本月打卡 <b id="monthCheckins">0</b> 天</div>
+                <div class="stats-item">🔥 连续打卡 <b id="streakDays">0</b> 天</div>
+            </div>
+            <div class="progress-row">
+                <div class="progress-text" id="progressText">0/0</div>
+                <div class="progress-bg"><div class="progress-fill" id="progressFill" style="width: 0%;"></div></div>
+            </div>
+            <div id="pendingTasks" class="task-group"></div>
+            <div id="completedTasks" class="task-group"></div>
+            <div id="unprocessedTasks" class="task-group"></div>
+        </div>
+    </div>
+
+    <div class="view-calendar" id="calendarView">
+        <div class="cal-header">
+            <div class="cal-arrow-box" onclick="clickAction('month','-1')">‹</div>
+            <div class="cal-title" id="calTitle">2025年12月</div>
+            <div class="cal-arrow-box" onclick="clickAction('month','1')">›</div>
+        </div>
+        <div class="cal-body">
+            <div class="cal-week">
+                <span>日</span><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span>
+            </div>
+            <div class="cal-grid" id="calendarGrid"></div>
+            <div class="long-term-container" id="longTermContainer">
+                <div class="long-term-empty">暂无长期项目，点击右上角 + 添加</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="bottom-nav" id="mainBottomNav">
+        <div class="nav-item active" onclick="clickAction('tab','today')">今日</div>
+        <div class="nav-item" onclick="clickAction('tab','calendar')">日历</div>
+    </div>
+
+    <!-- 添加任务弹窗 -->
+    <div class="modal-overlay" id="addModal">
+        <div class="modal-box">
+            <button class="modal-close-btn" onclick="clickAction('closeAdd')">✕</button>
+            <div class="modal-title" id="modalTitle">添加任务</div>
+            <input type="text" class="modal-input" id="habitInput" placeholder="输入名称，例如：跑步" autocomplete="off">
+            <div class="modal-btns">
+                <button class="modal-btn-save" onclick="clickAction('saveAdd')">添加</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 编辑长期项目弹窗 -->
+    <div class="modal-overlay" id="editModal">
+        <div class="modal-box">
+            <button class="modal-close-btn" onclick="clickAction('closeEdit')">✕</button>
+            <div class="modal-title" style="width:100%; text-align:center;">编辑长期项目</div>
+            <input type="text" class="modal-input" id="editProjectName" placeholder="名称" autocomplete="off">
+            <input type="text" class="modal-input" id="editProjectIcon" placeholder="图案 (Emoji，例如 🏃)" style="margin-top: -5px;" autocomplete="off">
+            <div class="days-spinner">
+                <button class="spinner-btn" onclick="clickAction('editLongDays','-1')">−</button>
+                <input type="number" class="days-input" id="editDaysInput" value="0" min="0" onchange="clickAction('editLongSync')">
+                <button class="spinner-btn" onclick="clickAction('editLongDays','1')">+</button>
+                <span style="font-size:14px; color:var(--sub-text); margin-left:5px;">天</span>
+            </div>
+            <div style="width:100%; padding: 5px 0;">
+                <div style="font-size:14px; color:var(--sub-text); margin-bottom:8px;">日历圆点颜色（点击选择）：</div>
+                <input type="hidden" id="editProjectColor" value="#000000">
+                <div class="color-options-container" id="colorOptionsContainer">
+                    <div class="color-option active" data-color="#000000" style="background:#000000;"></div>
+                    <div class="color-option" data-color="#FF0000" style="background:#FF0000;"></div>
+                    <div class="color-option" data-color="#0000FF" style="background:#0000FF;"></div>
+                    <div class="color-option" data-color="#008000" style="background:#008000;"></div>
+                    <div class="color-option" data-color="#FFA500" style="background:#FFA500;"></div>
+                    <div class="color-option" data-color="#800080" style="background:#800080;"></div>
+                    <div class="color-option" data-color="#FFC0CB" style="background:#FFC0CB;"></div>
+                    <div class="color-option" data-color="#00FFFF" style="background:#00FFFF;"></div>
+                </div>
+            </div>
+            <div style="display:flex; gap:10px; width:100%; justify-content:center; margin:5px 0;">
+                <button class="modal-btn-save" style="width:35%;" onclick="clickAction('moveProject','up')">↑ 上移</button>
+                <button class="modal-btn-save" style="width:35%;" onclick="clickAction('moveProject','down')">↓ 下移</button>
+            </div>
+            <button class="modal-delete-btn" onclick="clickAction('deleteLong')">🗑️ 删除该项目</button>
+            <div class="modal-btns" style="margin-top: 0px;">
+                <button class="modal-btn-save" onclick="clickAction('saveEdit')">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 编辑短期任务弹窗 -->
+    <div class="modal-overlay" id="editShortTermModal">
+        <div class="modal-box">
+            <button class="modal-close-btn" onclick="clickAction('closeEditShort')">✕</button>
+            <div class="modal-title" style="width:100%; text-align:center;">编辑短期任务</div>
+            <input type="text" class="modal-input" id="editShortTermName" placeholder="名称" autocomplete="off">
+            <input type="text" class="modal-input" id="editShortTermIcon" placeholder="图案 (Emoji，例如 🏃)" style="margin-top: -5px;" autocomplete="off">
+            <button class="modal-delete-btn" onclick="clickAction('deleteShort')">🗑️ 删除该任务</button>
+            <div class="modal-btns" style="margin-top: 0px;">
+                <button class="modal-btn-save" onclick="clickAction('saveEditShort')">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 打卡选择弹窗 -->
+    <div class="modal-overlay" id="dateCheckModal">
+        <div class="modal-box" style="align-items:center; text-align:center;">
+            <button class="modal-close-btn" onclick="clickAction('closeDateCheck')">✕</button>
+            <div class="modal-title" id="dateCheckTitle" style="text-align:center; font-size:18px;">7月5日</div>
+            <div id="projectSelectContainer" style="display:none; width:100%; margin-bottom:10px; text-align:left;">
+                <div style="font-size:12px; color:var(--sub-text); margin-bottom:8px;">选择打卡项目：</div>
+                <div id="projectOptionList"></div>
+            </div>
+            <div style="font-size:14px; color:var(--sub-text); width:100%; text-align:center;">是否设为打卡？</div>
+            <div class="modal-btns" style="margin-top:10px;">
+                <button class="modal-btn-save" id="dateCheckSaveBtn" onclick="clickAction('confirmDateCheck')" style="width:80%;">请先选择项目</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 重置确认弹窗 -->
+    <div class="custom-confirm" id="customConfirm">
+        <div class="confirm-box">
+            <button class="modal-close-btn" onclick="clickAction('confirmCancel')">✕</button>
+            <div class="confirm-title" id="confirmTitle">重置应用</div>
+            <div class="confirm-text" id="confirmMsg">确定要清空所有数据，恢复到初始状态吗？</div>
+            <div class="confirm-btns">
+                <button class="confirm-btn confirm" id="confirmOkBtn" onclick="clickAction('confirmOk')">确定重置</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 设置页面 -->
+    <div class="modal-overlay" id="settingsModal">
+        <div class="modal-box">
+            <button class="modal-close-btn" onclick="clickAction('toggleSettings')">✕</button>
+            <div class="profile-section">
+                <div class="avatar-wrapper" onclick="document.getElementById('avatarInput').click()">
+                    <img id="avatarPreview" src="" alt="头像">
+                    <div class="avatar-overlay">📷</div>
+                    <input type="file" id="avatarInput" accept="image/*" onchange="handleImageUpload(event)" style="display:none;">
+                </div>
+                <div class="profile-name" id="userNameDisplay" contenteditable="true" onblur="saveUserName()">你的名字</div>
+            </div>
+            <div class="settings-list">
+                <div class="settings-item" onclick="toggleDarkMode()" style="display:flex; justify-content:space-between; align-items:center;">
+                    <span>🌙 夜间模式</span>
+                    <span id="darkModeStatus" style="font-size:13px; color:var(--sub-text);">关闭</span>
+                </div>
+                <div class="settings-item" style="display:flex; justify-content:space-between; align-items:center;">
+                    <span>💾 导出数据</span>
+                    <button class="btn-small" onclick="exportData()">导出</button>
+                </div>
+                <div class="settings-item" style="display:flex; justify-content:space-between; align-items:center;">
+                    <span>📂 导入数据</span>
+                    <button class="btn-small" onclick="document.getElementById('importFileInput').click()">导入</button>
+                    <input type="file" id="importFileInput" accept=".json" style="display:none;" onchange="importData(event)">
+                </div>
+                <div class="settings-item danger" onclick="clickAction('reset')">重置应用为初始状态</div>
+                <div class="settings-item sub">版本 1.2.1</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let habits = [];
+    let calendarData = {}; 
+    let longTermProjects = []; 
+    let calDate = new Date(); 
+    let currentEditingId = null; 
+    let selectedDateStr = '';
+    let confirmCallback = null;
+    let selectedProjectIdForCheckin = null;
+
+    function getTodayStr() { return new Date().toISOString().split('T')[0]; }
+    function saveData() { try { localStorage.setItem('tickDailyData', JSON.stringify({ habits, calendarData, longTermProjects })); } catch(e) {} }
+
+    // ===== 增强版 loadData（容错、补全字段） =====
+    function loadData() {
+        try {
+            const saved = localStorage.getItem('tickDailyData');
+            if (saved) {
+                const data = JSON.parse(saved);
+                // 确保每个字段是预期类型，并提供默认值
+                habits = Array.isArray(data.habits) ? data.habits : [];
+                calendarData = (typeof data.calendarData === 'object' && data.calendarData !== null) ? data.calendarData : {};
+                longTermProjects = Array.isArray(data.longTermProjects) ? data.longTermProjects : [];
+                // 补全长期项目字段
+                longTermProjects.forEach(p => {
+                    if (!p.color) p.color = '#000000';
+                    if (!Array.isArray(p.checkins)) p.checkins = [];
+                });
+                // 补全短期任务字段
+                habits.forEach(h => {
+                    if (!h.icon) h.icon = '📌';
+                    if (typeof h.checked !== 'boolean') h.checked = false;
+                    if (!h.createdAt) h.createdAt = getTodayStr();
+                });
+            } else {
+                habits = [];
+                calendarData = {};
+                longTermProjects = [];
+            }
+        } catch (e) {
+            console.warn('数据加载失败，重置为空', e);
+            habits = [];
+            calendarData = {};
+            longTermProjects = [];
+        }
+    }
+
+    // ===== 温和版 importData（不刷新页面、不清理其他存储） =====
+    function importData(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const data = JSON.parse(e.target.result);
+                // 简单校验结构完整性
+                if (!data.habits || !data.calendarData || !data.longTermProjects) {
+                    throw new Error('数据格式不正确，缺少必要字段');
+                }
+                // 只覆盖 tickDailyData，不删除其他 key（如头像、用户名、夜间模式）
+                localStorage.setItem('tickDailyData', JSON.stringify(data));
+                // 重新加载内存数据
+                loadData();
+                // 刷新所有视图
+                renderHabits();
+                renderCalendar();
+                updateTodayDate();
+                // 关闭设置弹窗，恢复导航栏
+                document.getElementById('settingsModal').style.display = 'none';
+                document.getElementById('mainHeader').style.display = 'flex';
+                document.getElementById('mainBottomNav').style.display = 'flex';
+                // 清空文件 input，允许重复选择同一文件
+                event.target.value = '';
+                // 提示成功（可选）
+                alert('✅ 数据导入成功！');
+            } catch (err) {
+                alert("❌ 导入失败，请确认备份文件未损坏。错误：" + err.message);
+            }
+        };
+        reader.readAsText(file);
+    }
+
+    function showCustomConfirm(title, msg, confirmText, isConfirm, callback) {
+        document.getElementById('confirmTitle').innerText = title;
+        document.getElementById('confirmMsg').innerText = msg;
+        document.getElementById('confirmOkBtn').innerText = confirmText;
+        confirmCallback = isConfirm ? callback : null;
+        document.getElementById('customConfirm').style.display = 'flex';
+    }
+
+    function setupBackButtonInterception() {
+        window.addEventListener('hashchange', function(e) {
+            if (window.location.hash === '' || window.location.hash === '#') {
+                const settings = document.getElementById('settingsModal');
+                if (settings.style.display === 'flex') { settings.style.display = 'none'; document.getElementById('mainHeader').style.display = 'flex'; document.getElementById('mainBottomNav').style.display = 'flex'; return; }
+                const addModal = document.getElementById('addModal');
+                if (addModal.style.display === 'flex') { addModal.style.display = 'none'; return; }
+                const editModal = document.getElementById('editModal');
+                if (editModal.style.display === 'flex') { editModal.style.display = 'none'; currentEditingId = null; return; }
+                const editShortTermModal = document.getElementById('editShortTermModal');
+                if (editShortTermModal.style.display === 'flex') { editShortTermModal.style.display = 'none'; currentEditingId = null; return; }
+                const dateCheckModal = document.getElementById('dateCheckModal');
+                if (dateCheckModal.style.display === 'flex') { dateCheckModal.style.display = 'none'; selectedProjectIdForCheckin = null; return; }
+                const customConfirm = document.getElementById('customConfirm');
+                if (customConfirm.style.display === 'flex') { customConfirm.style.display = 'none'; confirmCallback = null; return; }
+            }
+        });
+        if(window.location.hash) { history.replaceState(null, null, ' '); }
+    }
+
+    function clickAction(action, param) {
+        try {
+            switch(action) {
+                case 'add': openAddModal(); break;
+                case 'tab': switchTab(param); break;
+                case 'closeAdd': closeAddModal(); break;
+                case 'saveAdd': saveNewItem(); break;
+                case 'toggleHabit': toggleHabit(param); break;
+                case 'deleteHabit': confirmDeleteHabit(param); break;
+                case 'editShort': openEditShortTerm(param); break;
+                case 'closeEditShort': closeEditShortTermModal(); break;
+                case 'saveEditShort': saveEditShortTerm(); break;
+                case 'deleteShort': deleteShortTermItem(); break;
+                case 'editLong': openEditLongTerm(param); break;
+                case 'closeEdit': closeEditModal(); break;
+                case 'saveEdit': saveEditModal(); break;
+                case 'editLongDays': adjustEditDays(parseInt(param)); break;
+                case 'editLongSync': syncEditDays(); break;
+                case 'deleteLong': deleteLongTermItem(); break;
+                case 'checkDate': openDateCheck(param); break;
+                case 'closeDateCheck': closeDateCheck(); break;
+                case 'confirmDateCheck': confirmDateCheck(); break;
+                case 'selectProject': selectProject(param); break;
+                case 'month': changeMonth(parseInt(param)); break;
+                case 'toggleSettings': toggleSettings(); break;
+                case 'reset': resetApp(); break;
+                case 'moveProject': moveLongTermProject(param); break;
+                case 'confirmCancel':
+                    document.getElementById('customConfirm').style.display = 'none';
+                    confirmCallback = null;
+                    break;
+                case 'confirmOk': 
+                    document.getElementById('customConfirm').style.display = 'none';
+                    if (confirmCallback) {
+                        const cb = confirmCallback;
+                        confirmCallback = null;
+                        cb(); 
+                    }
+                    break;
+                default: break;
+            }
+        } catch(e) { /* 静默容错 */ }
+    }
+
+    function toggleDarkMode() {
+        const body = document.body;
+        const statusText = document.getElementById('darkModeStatus');
+        body.classList.toggle('dark-mode');
+        const isDark = body.classList.contains('dark-mode');
+        localStorage.setItem('darkModeEnabled', isDark ? 'true' : 'false');
+        statusText.innerText = isDark ? '开启' : '关闭';
+    }
+    if (localStorage.getItem('darkModeEnabled') === 'true') {
+        document.body.classList.add('dark-mode');
+        document.getElementById('darkModeStatus').innerText = '开启';
+    }
+
+    function exportData() {
+        const data = { habits, calendarData, longTermProjects };
+        const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'tick_data_backup.json';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
+
+    function moveLongTermProject(direction) {
+        if (!currentEditingId) return;
+        const index = longTermProjects.findIndex(p => p.id === currentEditingId);
+        if (index === -1) return;
+        const newIndex = direction === 'up' ? index - 1 : index + 1;
+        if (newIndex < 0 || newIndex >= longTermProjects.length) return;
+        [longTermProjects[index], longTermProjects[newIndex]] = [longTermProjects[newIndex], longTermProjects[index]];
+        saveData();
+        renderCalendar();
+    }
+
+    function compressImage(file, maxWidth, maxHeight, quality) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const img = new Image();
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    let width = img.width;
+                    let height = img.height;
+                    if (width > height) {
+                        if (width > maxWidth) { height *= maxWidth / width; width = maxWidth; }
+                    } else {
+                        if (height > maxHeight) { width *= maxHeight / height; height = maxHeight; }
+                    }
+                    canvas.width = width; canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+                    resolve(canvas.toDataURL('image/jpeg', quality));
+                };
+                img.onerror = reject;
+                img.src = e.target.result;
+            };
+            reader.onerror = reject;
+            reader.readAsDataURL(file);
+        });
+    }
+
+    async function handleImageUpload(event) {
+        const file = event.target.files[0];
+        if (file) {
+            try {
+                const base64 = await compressImage(file, 300, 300, 0.7);
+                localStorage.setItem('userAvatar', base64);
+                loadSettingsData();
+            } catch (error) { alert("图片读取失败，请尝试选择较小的图片。"); }
+        }
+        event.target.value = '';
+    }
+
+    function toggleSettings() {
+        const settings = document.getElementById('settingsModal');
+        const header = document.getElementById('mainHeader');
+        const nav = document.getElementById('mainBottomNav');
+        if (settings.style.display === 'flex') {
+            settings.style.display = 'none'; header.style.display = 'flex'; nav.style.display = 'flex';
+            history.replaceState(null, null, ' ');
+        } else {
+            loadSettingsData(); settings.style.display = 'flex'; header.style.display = 'none'; nav.style.display = 'none';
+            window.location.hash = '#modal';
+        }
+    }
+
+    function loadSettingsData() {
+        const avatar = localStorage.getItem('userAvatar');
+        const img = document.getElementById('avatarPreview');
+        if (avatar) { img.src = avatar; img.classList.add('loaded'); } else { img.classList.remove('loaded'); }
+        const name = localStorage.getItem('userName');
+        const nameDisplay = document.getElementById('userNameDisplay');
+        if (name) { nameDisplay.innerText = name; } else { nameDisplay.innerText = '你的名字'; }
+    }
+
+    function saveUserName() {
+        const name = document.getElementById('userNameDisplay').innerText.trim();
+        if (name) { localStorage.setItem('userName', name); }
+    }
+
+    function openAddModal() {
+        const calView = document.getElementById('calendarView');
+        document.getElementById('modalTitle').innerText = calView.style.display === 'flex' ? '添加长期项目' : '添加短期任务';
+        document.getElementById('addModal').style.display = 'flex';
+        setTimeout(() => { document.getElementById('habitInput').focus(); }, 300);
+        window.location.hash = '#modal';
+    }
+    function openEditLongTerm(id) {
+        currentEditingId = id;
+        const p = longTermProjects.find(x => x.id === id);
+        if(!p) return;
+        document.getElementById('editProjectName').value = p.name;
+        document.getElementById('editProjectIcon').value = p.icon || '';
+        document.getElementById('editDaysInput').value = p.checkins.length;
+        const currentColor = p.color || '#000000';
+        document.getElementById('editProjectColor').value = currentColor;
+        const options = document.querySelectorAll('.color-option');
+        options.forEach(opt => {
+            opt.classList.remove('active');
+            if(opt.dataset.color === currentColor) { opt.classList.add('active'); }
+            opt.onclick = function(e) {
+                options.forEach(o => o.classList.remove('active'));
+                this.classList.add('active');
+                document.getElementById('editProjectColor').value = this.dataset.color;
+            }
+        });
+        document.getElementById('editModal').style.display = 'flex';
+        window.location.hash = '#modal';
+    }
+    function openEditShortTerm(id) {
+        currentEditingId = id;
+        const t = habits.find(h => h.id === id);
+        if(!t) return;
+        document.getElementById('editShortTermName').value = t.name;
+        document.getElementById('editShortTermIcon').value = t.icon || '';
+        document.getElementById('editShortTermModal').style.display = 'flex';
+        window.location.hash = '#modal';
+    }
+    function openDateCheck(dateStr) {
+        selectedDateStr = dateStr;
+        const parts = dateStr.split('-');
+        document.getElementById('dateCheckTitle').innerText = `${parseInt(parts[1])}月${parseInt(parts[2])}日`;
+        const selectContainer = document.getElementById('projectSelectContainer');
+        if (longTermProjects.length >= 1) { selectContainer.style.display = 'block'; renderProjectOptions(dateStr); } 
+        else { selectContainer.style.display = 'none'; selectedProjectIdForCheckin = null; }
+        document.getElementById('dateCheckModal').style.display = 'flex';
+        window.location.hash = '#modal';
+    }
+    function closeAddModal() { document.getElementById('addModal').style.display = 'none'; history.replaceState(null, null, ' '); }
+    function closeEditModal() { document.getElementById('editModal').style.display = 'none'; currentEditingId = null; history.replaceState(null, null, ' '); }
+    function closeEditShortTermModal() { document.getElementById('editShortTermModal').style.display = 'none'; currentEditingId = null; history.replaceState(null, null, ' '); }
+    function closeDateCheck() { document.getElementById('dateCheckModal').style.display = 'none'; history.replaceState(null, null, ' '); }
+
+    function renderProjectOptions(dateStr) {
+        const container = document.getElementById('projectOptionList');
+        container.innerHTML = '';
+        let html = '';
+        const isNoneSelected = !longTermProjects.some(p => p.checkins.includes(dateStr));
+        html += `<div class="project-option ${isNoneSelected ? 'selected' : ''}" onclick="clickAction('selectProject', '')"><span>取消选择</span><span class="check-mark">✓</span></div>`;
+        longTermProjects.forEach(p => {
+            const isSelected = p.checkins.includes(dateStr);
+            html += `<div class="project-option ${isSelected ? 'selected' : ''}" onclick="clickAction('selectProject', '${p.id}')"><span>${p.icon || '📌'} ${p.name}</span><span class="check-mark">✓</span></div>`;
+        });
+        container.innerHTML = html;
+        const selectedId = longTermProjects.find(p => p.checkins.includes(dateStr))?.id || null;
+        updateDateCheckButtonText(selectedId);
+    }
+
+    function selectProject(projectId) {
+        selectedProjectIdForCheckin = projectId; 
+        updateDateCheckButtonText(projectId);
+        const options = document.querySelectorAll('.project-option');
+        options.forEach(opt => {
+            opt.classList.remove('selected');
+            if (opt.onclick.toString().includes(`'${projectId}'`)) { opt.classList.add('selected'); } 
+            else if (!projectId && opt.querySelector('span').innerText === '取消选择') { opt.classList.add('selected'); }
+        });
+    }
+
+    function updateDateCheckButtonText(projectId) {
+        const saveBtn = document.getElementById('dateCheckSaveBtn');
+        if (!projectId) { saveBtn.innerText = '请先选择项目'; saveBtn.style.opacity = '0.5'; saveBtn.style.pointerEvents = 'none'; return; }
+        saveBtn.style.opacity = '1'; saveBtn.style.pointerEvents = 'auto';
+        const project = longTermProjects.find(p => p.id === projectId);
+        const isChecked = project && project.checkins.includes(selectedDateStr);
+        saveBtn.innerText = isChecked ? '取消打卡' : '确认打卡';
+    }
+
+    function switchTab(tab) {
+        const today = document.getElementById('todayView');
+        const cal = document.getElementById('calendarView');
+        const title = document.getElementById('headerTitle');
+        const navs = document.querySelectorAll('.nav-item');
+        navs.forEach(n => n.classList.remove('active'));
+        const activeNav = document.querySelector(`.nav-item[onclick*="'${tab}'"]`);
+        if(activeNav) activeNav.classList.add('active');
+        if (tab === 'today') {
+            today.style.display = 'flex'; cal.style.display = 'none';
+            title.innerText = '今日'; updateTodayDate(); renderHabits();
+        } else {
+            today.style.display = 'none'; cal.style.display = 'flex';
+            title.innerText = '日历'; renderCalendar();
+        }
+        history.replaceState(null, null, ' ');
+    }
+
+    function resetApp() {
+        showCustomConfirm("重置应用", "确定要清空所有数据，恢复到初始状态吗？", "确定重置", true, function(){
+            localStorage.clear();
+            document.getElementById('settingsModal').style.display = 'none';
+            document.getElementById('mainHeader').style.display = 'flex';
+            document.getElementById('mainBottomNav').style.display = 'flex';
+            habits = []; calendarData = {}; longTermProjects = [];
+            history.replaceState(null, null, ' ');
+            renderHabits(); renderCalendar();
+        });
+    }
+
+    function updateTodayDate() {
+        const now = new Date();
+        const weekdays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+        document.getElementById('headerSub').innerText = `${now.getMonth() + 1}月${now.getDate()}日，${weekdays[now.getDay()]}`;
+    }
+
+    function changeMonth(offset) {
+        calDate.setMonth(calDate.getMonth() + offset);
+        renderCalendar();
+    }
+
+    function updateStats() {
+        try {
+            const allDates = new Set();
+            longTermProjects.forEach(p => { if (p.checkins && Array.isArray(p.checkins)) { p.checkins.forEach(date => allDates.add(date)); } });
+            const sortedDates = Array.from(allDates).sort();
+            const now = new Date();
+            const currentMonth = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+            const monthCount = sortedDates.filter(d => d.startsWith(currentMonth)).length;
+            document.getElementById('monthCheckins').innerText = monthCount;
+            let streak = 0;
+            if (sortedDates.length > 0) {
+                let currentStreak = 1;
+                for (let i = sortedDates.length - 1; i > 0; i--) {
+                    const curr = new Date(sortedDates[i]);
+                    const prev = new Date(sortedDates[i-1]);
+                    const timeDiff = curr.getTime() - prev.getTime();
+                    const dayDiff = timeDiff / (1000 * 3600 * 24);
+                    if (dayDiff === 1) { currentStreak++; } else { break; }
+                }
+                streak = currentStreak;
+            }
+            document.getElementById('streakDays').innerText = streak;
+        } catch (e) {
+            document.getElementById('monthCheckins').innerText = '0';
+            document.getElementById('streakDays').innerText = '0';
+        }
+    }
+
+    function renderHabits() {
+        const today = getTodayStr();
+        const pending = habits.filter(h => !h.checked && h.createdAt === today);
+        const completed = habits.filter(h => h.checked);
+        const unprocessed = habits.filter(h => !h.checked && h.createdAt !== today);
+
+        const total = habits.length;
+        const checkedCount = completed.length;
+        document.getElementById('progressText').innerText = `${checkedCount}/${total}`;
+        document.getElementById('progressFill').style.width = total > 0 ? `${(checkedCount / total) * 100}%` : '0%';
+
+        if (total === 0) { document.getElementById('emptyState').style.display = 'flex'; document.getElementById('listState').style.display = 'none'; return; } 
+        else { document.getElementById('emptyState').style.display = 'none'; document.getElementById('listState').style.display = 'flex'; }
+
+        function fillGroup(containerId, tasks, title, emptyText) {
+            const container = document.getElementById(containerId);
+            if (tasks.length === 0) { container.innerHTML = `<div class="task-group-title">${emptyText}</div>`; return; }
+            let html = `<div class="task-group-title">${title}</div><div class="task-group-divider"></div>`;
+            tasks.forEach(t => {
+                html += `
+                    <div class="habit-item">
+                        <div class="habit-left" onclick="clickAction('editShort','${t.id}')">
+                            <span class="habit-icon">${t.icon}</span>
+                            <div>
+                                <div class="habit-name">${t.name}</div>
+                                <div class="habit-desc">今日任务</div>
+                            </div>
+                        </div>
+                        <div class="habit-right">
+                            <div class="checkbox ${t.checked ? 'active' : ''}" onclick="clickAction('toggleHabit','${t.id}')"><div class="check-dot"></div></div>
+                            <div class="delete-btn" onclick="clickAction('deleteHabit','${t.id}')">×</div>
+                        </div>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+        }
+        fillGroup('pendingTasks', pending, '待处理', '暂无待处理任务');
+        fillGroup('completedTasks', completed, '已处理', '暂无已处理任务');
+        fillGroup('unprocessedTasks', unprocessed, '未处理', '暂无未处理任务');
+        updateStats();
+    }
+
+    function toggleHabit(id) {
+        habits = habits.map(h => h.id === id ? { ...h, checked: !h.checked } : h);
+        saveData(); renderHabits();
+    }
+
+    function confirmDeleteHabit(id) {
+        const h = habits.find(h => h.id === id);
+        showCustomConfirm("删除提示", `确定要删除“${h ? h.name : ''}”吗？`, "删除", true, function(){
+            habits = habits.filter(h => h.id !== id);
+            saveData(); renderHabits();
+        });
+    }
+
+    function renderCalendar() {
+        const year = calDate.getFullYear();
+        const month = calDate.getMonth();
+        document.getElementById('calTitle').innerText = `${year}年${month + 1}月`;
+        const grid = document.getElementById('calendarGrid');
+        grid.innerHTML = '';
+        const firstDayIndex = new Date(year, month, 1).getDay(); 
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+        const monthKey = `${year}-${String(month + 1).padStart(2, '0')}`;
+
+        let html = '';
+        for (let i = 0; i < firstDayIndex; i++) html += `<div class="cal-day"></div>`;
+        for (let i = 1; i <= daysInMonth; i++) {
+            const dateFullStr = `${monthKey}-${String(i).padStart(2, '0')}`;
+            const colors = longTermProjects.filter(p => p.checkins.includes(dateFullStr)).map(p => p.color || '#000000');
+            const hasDot = colors.length > 0;
+            
+            let dotHtml = '';
+            if (hasDot) {
+                if (colors.length === 1) {
+                    const c = colors[0];
+                    let style = '';
+                    if (c === '#000000') { style = ''; } 
+                    else { style = `background-color: ${c}; border-color: ${c};`; }
+                    dotHtml = `<div class="cal-dot" style="${style}"></div>`;
+                } else if (colors.length > 1) {
+                    dotHtml = `<div style="position:absolute; top:0; left:0; width:100%; height:100%; border-radius:50%; background:#000; color:#fff; display:flex; justify-content:center; align-items:center; font-size:11px; font-weight:bold; z-index:10;">${colors.length}</div>`;
+                }
+            }
+
+            html += `
+                <div class="cal-day ${hasDot ? 'has-dot' : ''}">
+                    <div class="cal-inner" onclick="clickAction('checkDate','${dateFullStr}')">
+                        <span class="cal-date-num">${i}</span>
+                        <div class="cal-border-placeholder"></div>
+                        ${dotHtml}
+                    </div>
+                </div>
+            `;
+        }
+        grid.innerHTML = html;
+        renderLongTermProjects();
+        updateStats();
+    }
+
+    function renderLongTermProjects() {
+        const container = document.getElementById('longTermContainer');
+        container.innerHTML = '';
+        if (longTermProjects.length === 0) {
+            container.innerHTML = `<div class="long-term-empty">暂无长期项目，点击右上角 + 添加</div>`;
+        } else {
+            let html = '';
+            longTermProjects.forEach(p => {
+                const count = p.checkins ? p.checkins.length : 0;
+                html += `
+                    <div class="project-item" onclick="clickAction('editLong','${p.id}')">
+                        <div class="project-left">
+                            <span class="project-icon">${p.icon || '📌'}</span>
+                            <span class="project-name">${p.name}</span>
+                        </div>
+                        <div class="project-right">
+                            <span class="project-days">已坚持 <b>${count}</b> 天</span>
+                        </div>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+        }
+    }
+
+    function saveNewItem() {
+        const title = document.getElementById('modalTitle');
+        const input = document.getElementById('habitInput');
+        const name = input.value.trim();
+        if (!name) { showCustomConfirm("提示", "请输入名称！", "确定", false, null); return; }
+        const emojis = ['📚', '💪', '🧘', '🎨', '✍️', '🏃', '🎯', '🧠', '💻'];
+        const icon = emojis[Math.floor(Math.random() * emojis.length)];
+        if (title.innerText === '添加长期项目') { longTermProjects.push({ id: Date.now().toString(), name, icon, color: '#000000', checkins: [] }); } 
+        else { habits.push({ id: Date.now().toString(), name, icon, checked: false, createdAt: getTodayStr() }); }
+        closeAddModal(); saveData();
+        if (title.innerText === '添加长期项目') renderCalendar(); else renderHabits();
+    }
+
+    function adjustEditDays(step) {
+        const p = longTermProjects.find(x => x.id === currentEditingId);
+        if(!p) return;
+        const input = document.getElementById('editDaysInput');
+        let val = parseInt(input.value);
+        if (isNaN(val)) val = 0;
+        let newVal = val + step;
+        if (newVal < 0) newVal = 0;
+        input.value = newVal;
+        syncEditDays();
+    }
+
+    function syncEditDays() {
+        const p = longTermProjects.find(x => x.id === currentEditingId);
+        if(!p) return;
+        const input = document.getElementById('editDaysInput');
+        let targetDays = parseInt(input.value);
+        if (isNaN(targetDays) || targetDays < 0) targetDays = 0;
+        input.value = targetDays;
+        const today = getTodayStr();
+        if (targetDays > p.checkins.length) { for (let i = p.checkins.length; i < targetDays; i++) { p.checkins.push(today); } } 
+        else if (targetDays < p.checkins.length) { p.checkins.splice(targetDays); }
+        saveData(); renderCalendar();
+    }
+
+    function saveEditModal() {
+        const p = longTermProjects.find(x => x.id === currentEditingId);
+        if(!p) return;
+        const name = document.getElementById('editProjectName').value.trim();
+        if(!name) { showCustomConfirm("提示", "名称不能为空！", "确定", false, null); return; }
+        p.name = name;
+        p.icon = document.getElementById('editProjectIcon').value.trim() || '📌';
+        p.color = document.getElementById('editProjectColor').value;
+        syncEditDays(); closeEditModal(); saveData(); renderCalendar();
+    }
+
+    function saveEditShortTerm() {
+        const t = habits.find(h => h.id === currentEditingId);
+        if(!t) return;
+        const name = document.getElementById('editShortTermName').value.trim();
+        if(!name) { showCustomConfirm("提示", "名称不能为空！", "确定", false, null); return; }
+        t.name = name;
+        t.icon = document.getElementById('editShortTermIcon').value.trim() || '📌';
+        closeEditShortTermModal(); saveData(); renderHabits();
+    }
+
+    function confirmDateCheck() {
+        if (longTermProjects.length === 0) { showCustomConfirm("提示", "还没有长期项目，请先点击右上角添加哦。", "知道了", false, null); return; }
+        const targetProjectId = selectedProjectIdForCheckin;
+        if (!targetProjectId) { showCustomConfirm("提示", "请先在下拉列表中选择一个项目再操作。", "知道了", false, null); return; }
+        const project = longTermProjects.find(p => p.id === targetProjectId);
+        if (!project) return;
+        const isChecked = project.checkins.includes(selectedDateStr);
+        if (isChecked) {
+            const index = project.checkins.indexOf(selectedDateStr);
+            if (index > -1) { project.checkins.splice(index, 1); }
+        } else {
+            if (!project.checkins.includes(selectedDateStr)) {
+                project.checkins.push(selectedDateStr);
+                project.checkins.sort((a,b) => a.localeCompare(b));
+            }
+        }
+        closeDateCheck(); saveData(); renderCalendar();
+    }
+
+    function deleteLongTermItem() {
+        const id = currentEditingId;
+        if(!id) return;
+        showCustomConfirm("删除提示", "确定要删除这个长期项目以及所有打卡记录吗？", "删除", true, function(){
+            longTermProjects = longTermProjects.filter(x => x.id !== id);
+            closeEditModal(); saveData(); renderCalendar();
+        });
+    }
+
+    function deleteShortTermItem() {
+        const id = currentEditingId;
+        if(!id) return;
+        showCustomConfirm("删除提示", "确定要删除这个短期任务吗？", "删除", true, function(){
+            habits = habits.filter(h => h.id !== id);
+            closeEditShortTermModal(); saveData(); renderHabits();
+        });
+    }
+
+    loadData();
+    updateTodayDate(); 
+    renderHabits();
+    renderCalendar();
+    setupBackButtonInterception();
+</script>
+</body>
+</html>
