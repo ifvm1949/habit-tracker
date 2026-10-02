@@ -1,5 +1,5 @@
 window.__ANNOUNCEMENT__ = {
-  "id": 4,
+  "id": 5,
   "versionCode": 2,
   "versionName": "1.3.8",
   "updateLog": "1. 新增更新检查功能\n2. 优化性能",
