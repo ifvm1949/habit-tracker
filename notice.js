@@ -12,5 +12,9 @@ window.__ANNOUNCEMENT__ = {
     downloadUrl: 'https://wwblc.lanzouv.com/isYX14ankroj'
   },
 
-  notice: null
+  notice: {
+  id:'20251003_1',
+  title:'新版本1.3.8',
+  content:'优化'
+ }
 };
