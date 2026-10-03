@@ -12,9 +12,5 @@ window.__ANNOUNCEMENT__ = {
     downloadUrl: 'https://wwblc.lanzouv.com/isYX14ankroj'
   },
 
-  notice: {
-    id: '20251005-1',
-    title: '测试',
-    content: '111'
-  }
+  notice: null
 };
