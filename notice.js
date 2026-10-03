@@ -16,5 +16,6 @@ window.__ANNOUNCEMENT__ = {
     id: '20251005-1',
     title: '测试',
     content: '111'
+    force:true
   }
 };
