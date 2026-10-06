@@ -5,21 +5,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#ffffff">
+<meta name="app-version" content="1.4.1">
 <title>Tick Daily</title>
 <style>
-:root{
-  --bg-color:#ffffff; --text-color:#000000; --sub-text:#888888; --border-color:#f0f0f0;
-  --modal-bg:#ffffff; --input-border:#eeeeee; --checkbox-border:#000000;
-  --progress-bg:#eeeeee; --light-gray:#f5f5f5;
-}
-body.dark-mode{
-  --bg-color:#121212; --text-color:#f0f0f0; --sub-text:#999999; --border-color:#333333;
-  --modal-bg:#1e1e1e; --input-border:#444444; --checkbox-border:#ffffff;
-  --progress-bg:#333333; --light-gray:#2a2a2a;
-}
+:root{--bg-color:#ffffff;--text-color:#000000;--sub-text:#888888;--border-color:#f0f0f0;--modal-bg:#ffffff;--input-border:#eeeeee;--checkbox-border:#000000;--progress-bg:#eeeeee;--light-gray:#f5f5f5;}
+body.dark-mode{--bg-color:#121212;--text-color:#f0f0f0;--sub-text:#999999;--border-color:#333333;--modal-bg:#1e1e1e;--input-border:#444444;--checkbox-border:#ffffff;--progress-bg:#333333;--light-gray:#2a2a2a;}
 html,body{background:var(--bg-color);width:100%;height:100%;overflow:hidden;transition:background .3s}
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;touch-action:manipulation;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;-webkit-touch-callout:none;user-select:none}
-input, textarea{-webkit-touch-callout:default;user-select:text}
+input,textarea{-webkit-touch-callout:default;user-select:text}
 button,[onclick],[data-action],[data-project-id],.color-option,.checkbox,.delete-btn{cursor:pointer}
 .app-container{width:100%;max-width:390px;height:100vh;margin:0 auto;background:var(--bg-color);display:flex;flex-direction:column;position:relative;transition:background .3s}
 .header{display:flex;justify-content:space-between;align-items:flex-start;padding:20px;flex-shrink:0;padding-top:max(20px,env(safe-area-inset-top));background:var(--bg-color);z-index:5;transition:background .3s}
@@ -134,8 +127,6 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 .settings-item.sub{color:var(--sub-text)}
 .settings-item .btn-small{background:var(--light-gray);color:var(--text-color);padding:6px 12px;border-radius:30px;border:1px solid var(--border-color);float:right;margin-top:-4px;font-size:13px;transition:.2s}
 .settings-item .btn-small:active{opacity:.5}
-
-/* ============ 打卡统计页面 ============ */
 #statsModal .modal-box{position:absolute;top:0;left:0;width:100%;height:100%;max-width:100%;border-radius:0;padding:40px 24px;background:var(--modal-bg);display:flex;flex-direction:column;align-items:center;transition:background .3s;overflow-y:auto}
 #statsModal .modal-close-btn{top:20px;right:20px;width:34px;height:34px;font-size:16px}
 #statsModal .modal-title{margin-top:20px;margin-bottom:20px}
@@ -157,13 +148,7 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 .stats-project-nums b{color:var(--text-color);font-weight:600;transition:color .3s}
 .stats-expand-icon{font-size:16px;color:var(--sub-text);padding:8px;transition:transform .2s}
 .stats-project-item.expanded .stats-expand-icon{transform:rotate(180deg)}
-.stats-project-item.dragging,
-.project-item.dragging {
-  opacity: 0.45;
-  background: var(--light-gray);
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-}
+.stats-project-item.dragging,.project-item.dragging{opacity:.45;background:var(--light-gray);border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,.1)}
 .stats-project-edit{padding:0 0 18px 0;display:flex;flex-direction:column;gap:10px;animation:fadeIn .2s ease}
 @keyframes fadeIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
 .stats-edit-input{width:100%;border:1.5px solid var(--input-border);border-radius:10px;padding:10px 12px;font-size:14px;outline:none;background:var(--modal-bg);color:var(--text-color);transition:all .3s}
@@ -179,8 +164,6 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 .stats-edit-btn.save{background:var(--text-color);color:var(--bg-color)}
 .stats-edit-btn.delete{background:#fff4f4;color:#ff4d4f}
 .stats-edit-btn:active{opacity:.7}
-
-/* ============ 公告弹窗 ============ */
 .announcement-box{background:var(--modal-bg);width:85%;max-width:320px;padding:26px 22px 22px;border-radius:16px;box-shadow:0 15px 40px rgba(0,0,0,.15);display:flex;flex-direction:column;gap:12px;align-items:center;position:relative;transition:background .3s}
 .announcement-title{font-size:17px;font-weight:600;color:var(--text-color);text-align:center;line-height:1.4;word-break:break-word}
 .announcement-content{font-size:14px;color:var(--sub-text);line-height:1.6;text-align:left;width:100%;white-space:pre-wrap;word-break:break-word;max-height:50vh;overflow-y:auto}
@@ -223,10 +206,8 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
       <div class="cal-arrow-box" onclick="clickAction('month','1')">›</div>
     </div>
     <div class="cal-body">
-      <div class="stats-banner clickable" id="statsBanner" onclick="clickAction('openStats')" style="margin-top:0; margin-bottom:15px;">
-        <div class="stats-item" style="font-size:15px; color:var(--text-color); font-weight:500;">
-          📊 打卡统计
-        </div>
+      <div class="stats-banner clickable" id="statsBanner" onclick="clickAction('openStats')" style="margin-top:0;margin-bottom:15px;">
+        <div class="stats-item" style="font-size:15px;color:var(--text-color);font-weight:500;">📊 打卡统计</div>
       </div>
       <div class="cal-week" id="calWeek"></div>
       <div class="cal-grid" id="calendarGrid"></div>
@@ -279,18 +260,9 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
       <button class="modal-close-btn" onclick="clickAction('closeStats')">✕</button>
       <div class="modal-title" data-i18n="statsTitle">打卡统计</div>
       <div class="stats-summary">
-        <div class="stats-card">
-          <div class="num" id="statsMonthTotal">0</div>
-          <div class="label" data-i18n="statsMonthLabel">本月打卡</div>
-        </div>
-        <div class="stats-card">
-          <div class="num" id="statsStreakTotal">0</div>
-          <div class="label" data-i18n="statsStreakLabel">连续打卡</div>
-        </div>
-        <div class="stats-card">
-          <div class="num" id="statsProjectCount">0</div>
-          <div class="label" data-i18n="statsProjectLabel">长期项目</div>
-        </div>
+        <div class="stats-card"><div class="num" id="statsMonthTotal">0</div><div class="label" data-i18n="statsMonthLabel">本月打卡</div></div>
+        <div class="stats-card"><div class="num" id="statsStreakTotal">0</div><div class="label" data-i18n="statsStreakLabel">连续打卡</div></div>
+        <div class="stats-card"><div class="num" id="statsProjectCount">0</div><div class="label" data-i18n="statsProjectLabel">长期项目</div></div>
       </div>
       <div class="stats-section-title" data-i18n="statsPerProject">各项目明细（点击可编辑，长按可拖动排序）</div>
       <div class="stats-project-list" id="statsProjectList"></div>
@@ -335,83 +307,25 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
           <button class="btn-small" onclick="document.getElementById('importFileInput').click()" data-i18n="importBtn">导入</button>
           <input type="file" id="importFileInput" accept=".json" style="display:none" onchange="importData(event)">
         </div>
+        <div class="settings-item" onclick="showQR()">☕ 请我喝杯咖啡（自愿）</div>
         <div class="settings-item danger" onclick="clickAction('reset')" data-i18n="resetItem">重置应用为初始状态</div>
       </div>
     </div>
   </div>
 
-  <!-- 公告弹窗 -->
   <div class="modal-overlay" id="announcementModal">
     <div class="announcement-box">
       <div class="announcement-title" id="announcementTitle"></div>
       <div class="announcement-content" id="announcementContent"></div>
-      <div class="modal-btns" style="margin-top:6px">
-        <button class="modal-btn-save" id="announcementClose">我知道了</button>
+      <div class="modal-btns" style="margin-top:6px;gap:8px;width:100%;">
+        <button class="modal-btn-save" id="announcementDismiss" style="width:45%;background:var(--light-gray);color:var(--text-color);">不再提示</button>
+        <button class="modal-btn-save" id="announcementClose" style="width:45%;">取消</button>
       </div>
     </div>
   </div>
 </div>
 
 <script>
-/* ============ 公告：启动时拉取远端配置 ============ */
-(function () {
-    // 👇👇👇 改成你自己的公告地址（GitHub Pages / Gitee Pages / OSS 都行）
-    var ANNOUNCEMENT_URL = 'https://raw.githubusercontent.com/ifvm1949/habit-tracker/main/announcement.json';
-    // 👆👆👆 如果留空，公告功能自动关闭
-
-    if (!ANNOUNCEMENT_URL) return;
-
-    function showAnnouncement(data) {
-        var modal = document.getElementById('announcementModal');
-        if (!modal) return;
-        document.getElementById('announcementTitle').innerText = data.title || '';
-        document.getElementById('announcementContent').innerText = data.content || '';
-
-        var closeBtn = document.getElementById('announcementClose');
-        if (data.force) {
-            closeBtn.innerText = '我知道了';
-        } else {
-            closeBtn.innerText = '不再提示';
-        }
-        closeBtn.onclick = function () {
-            modal.style.display = 'none';
-            try { localStorage.setItem('lastAnnouncementId', String(data.id)); } catch (e) {}
-        };
-        modal.style.display = 'flex';
-    }
-
-    function loadAnnouncement() {
-        var xhr = new XMLHttpRequest();
-        xhr.open('GET', ANNOUNCEMENT_URL + '?t=' + Date.now(), true);
-        xhr.timeout = 5000;
-        xhr.onreadystatechange = function () {
-            if (xhr.readyState !== 4) return;
-            if (xhr.status !== 200 && xhr.status !== 0) return;
-            try {
-                var data = JSON.parse(xhr.responseText);
-                if (!data || data.id === undefined) return;
-
-                var lastSeen = null;
-                try { lastSeen = localStorage.getItem('lastAnnouncementId'); } catch (e) {}
-
-                // force 时每次都弹；非 force 时 id 相同就不弹
-                if (!data.force && String(data.id) === lastSeen) return;
-                showAnnouncement(data);
-            } catch (e) { /* JSON 解析失败，静默 */ }
-        };
-        try { xhr.send(); } catch (e) { /* 网络失败，静默 */ }
-    }
-
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', function () {
-            setTimeout(loadAnnouncement, 800);
-        });
-    } else {
-        setTimeout(loadAnnouncement, 800);
-    }
-})();
-
-/* ============ 多语言 ============ */
 const TRANSLATIONS = {
   zh: {
     today:'今日', calendar:'日历', noHabits:'{n} 个习惯', startFirst:'开始你的第一个',
@@ -435,7 +349,7 @@ const TRANSLATIONS = {
     resetItem:'重置应用为初始状态',
     language:'🌐 语言 / Language', hintTitle:'提示', okBtn:'确定',
     deleteTitle:'删除提示', deleteBtn:'删除',
-    deleteHabitMsg:'确定要删除“{name}”吗？',
+    deleteHabitMsg:'确定要删除"{name}"吗？',
     deleteLongMsg:'确定要删除这个长期项目以及所有打卡记录吗？',
     deleteShortMsg:'确定要删除这个短期任务吗？',
     noLongTermHint:'还没有长期项目，请先点击右上角添加哦。',
@@ -508,7 +422,6 @@ if (currentLang !== 'zh' && currentLang !== 'en') {
   currentLang = ((navigator.language || 'zh').toLowerCase().indexOf('zh') === 0) ? 'zh' : 'en';
 }
 
-/* ============ 常量与工具 ============ */
 const DEFAULT_COLOR = '#000000';
 const DEFAULT_ICON  = '📌';
 const ICON_POOL = ['📚','💪','🧘','🎨','✍️','🏃','🎯','🧠','💻'];
@@ -546,7 +459,6 @@ function showToast(msg, duration = 2000) {
   setTimeout(() => { el.style.opacity = '0'; setTimeout(() => el.remove(), 220); }, duration);
 }
 
-/* ============ 翻译与区域格式 ============ */
 function t(key, vars) {
   const dict = TRANSLATIONS[currentLang] || TRANSLATIONS.zh;
   let str = dict[key] !== undefined ? dict[key] : TRANSLATIONS.zh[key];
@@ -592,7 +504,6 @@ function formatShortDate(s){
   return new Intl.DateTimeFormat(getLocale(), { month:'short', day:'numeric' }).format(new Date(parseInt(y,10), parseInt(m,10)-1, parseInt(d,10)));
 }
 
-/* ============ 数据层 ============ */
 let habits = [];
 let longTermProjects = [];
 let calDate = new Date();
@@ -638,7 +549,6 @@ function loadData(){
   }
 }
 
-/* ============ 语言应用 ============ */
 function toggleLanguage(){
   currentLang = currentLang === 'zh' ? 'en' : 'zh';
   localStorage.setItem('appLang', currentLang);
@@ -685,7 +595,6 @@ function applyLanguage(){
   }
 }
 
-/* ============ 确认弹窗 ============ */
 function showCustomConfirm(title, msg, confirmText, isConfirm, callback){
   document.getElementById('confirmTitle').innerText = title;
   document.getElementById('confirmMsg').innerText = msg;
@@ -696,6 +605,11 @@ function showCustomConfirm(title, msg, confirmText, isConfirm, callback){
 
 function setupBackButtonInterception(){
   window.addEventListener('hashchange', function(){
+    var qr = document.getElementById('qrModal');
+    if (qr && window.location.hash !== '#qr') {
+      qr.remove();
+      return;
+    }
     if (window.location.hash === '' || window.location.hash === '#') {
       const settings = document.getElementById('settingsModal');
       if (settings.style.display === 'flex') { settings.style.display = 'none'; showMainChrome(); return; }
@@ -718,7 +632,6 @@ function showMainChrome(){
   document.getElementById('mainBottomNav').style.display = 'flex';
 }
 
-/* ============ 事件分发 ============ */
 function clickAction(action, param){
   try {
     switch(action){
@@ -749,7 +662,6 @@ function clickAction(action, param){
   } catch(e){ console.error('[clickAction]', action, param, e); }
 }
 
-/* ============ 拖拽排序 ============ */
 function setupDragSort(container, itemSelector, onSave){
   if (!container || container.dataset.dragBound) return;
   container.dataset.dragBound = '1';
@@ -831,7 +743,6 @@ function setupDragSort(container, itemSelector, onSave){
   }, true);
 }
 
-/* ============ 事件委托 ============ */
 function setupDelegation(){
   ['pendingTasks','completedTasks','unprocessedTasks'].forEach(id => {
     const el = document.getElementById(id);
@@ -925,7 +836,6 @@ function setupDelegation(){
   }
 }
 
-/* ============ 夜间模式 ============ */
 function updateDarkModeStatus(){
   const dict = TRANSLATIONS[currentLang] || TRANSLATIONS.zh;
   document.getElementById('darkModeStatus').innerText =
@@ -938,7 +848,6 @@ function toggleDarkMode(){
 }
 if (localStorage.getItem('darkModeEnabled') === 'true') document.body.classList.add('dark-mode');
 
-/* ============ 导入导出 ============ */
 function exportData(){
   const data = { habits, longTermProjects, version: 2 };
   const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
@@ -999,7 +908,6 @@ function importData(event){
   reader.readAsText(file);
 }
 
-/* ============ 头像 ============ */
 function compressImage(file, maxWidth, maxHeight, quality){
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -1034,8 +942,25 @@ async function handleImageUpload(event){
   }
   event.target.value = '';
 }
-
-/* ============ 设置面板 ============ */
+function showQR() {
+  if (document.getElementById('qrModal')) return;
+  var modal = document.createElement('div');
+  modal.id = 'qrModal';
+  modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.7);display:flex;justify-content:center;align-items:center;z-index:99999';
+  modal.innerHTML = '<div style="background:#fff;padding:18px;border-radius:16px;text-align:center;width:75%;max-width:280px">' +
+    '<div style="font-size:16px;font-weight:600;margin-bottom:10px;color:#000">请我喝杯咖啡</div>' +
+    '<img src="qr.png" style="width:100%;display:block;border-radius:8px">' +
+    '<div style="font-size:12px;color:#888;margin-top:10px">完全自愿，谢谢支持</div>' +
+    '</div>';
+  modal.onclick = function () {
+    modal.remove();
+    if (window.location.hash === '#qr') {
+      try { history.replaceState(null, '', location.href.split('#')[0] + '#modal'); } catch(e){}
+    }
+  };
+  document.body.appendChild(modal);
+  window.location.hash = '#qr';
+}
 function toggleSettings(){
   const settings = document.getElementById('settingsModal');
   if (settings.style.display === 'flex') {
@@ -1066,7 +991,6 @@ function saveUserName(){
   else { localStorage.removeItem('userName'); document.getElementById('userNameDisplay').innerText = dict.yourName; }
 }
 
-/* ============ 弹窗开关 ============ */
 function openAddModal(){
   const dict = TRANSLATIONS[currentLang] || TRANSLATIONS.zh;
   document.getElementById('modalTitle').innerText = currentTab === 'calendar' ? dict.addLongProject : dict.addShortTask;
@@ -1114,7 +1038,6 @@ function closeDateCheck(){
   clearHash();
 }
 
-/* ============ 打卡项目选择 ============ */
 function renderProjectOptions(dateStr){
   const dict = TRANSLATIONS[currentLang] || TRANSLATIONS.zh;
   const container = document.getElementById('projectOptionList');
@@ -1157,7 +1080,6 @@ function updateDateCheckButtonText(projectId){
   saveBtn.innerText = isChecked ? dict.cancelCheckin : dict.confirmCheckin;
 }
 
-/* ============ 视图切换 ============ */
 function switchTab(tab){
   currentTab = tab;
   const dict = TRANSLATIONS[currentLang] || TRANSLATIONS.zh;
@@ -1198,7 +1120,6 @@ function changeMonth(offset){
   renderCalendar();
 }
 
-/* ============ 单个项目的统计 ============ */
 function getProjectStats(project){
   const dates = Array.isArray(project.checkins) ? project.checkins.slice().sort() : [];
   const now = new Date();
@@ -1224,7 +1145,6 @@ function getProjectStats(project){
   return { monthCount, streak, total: dates.length };
 }
 
-/* ============ 统计页面 ============ */
 function openStats(){
   expandedStatsId = null;
   renderStatsPage();
@@ -1338,7 +1258,6 @@ function renderStatsPage(){
   listEl.innerHTML = html;
 }
 
-/* ============ 内联编辑保存 ============ */
 function saveStatsInlineEdit(id){
   const dict = TRANSLATIONS[currentLang] || TRANSLATIONS.zh;
   const item = document.querySelector(`.stats-project-item[data-id="${id}"]`);
@@ -1399,7 +1318,6 @@ function applyDaysChange(p, targetDays){
   }
 }
 
-/* ============ 日历视图 ============ */
 function renderCalendar(){
   const year = calDate.getFullYear();
   const month = calDate.getMonth();
@@ -1469,7 +1387,6 @@ function renderLongTermProjects(){
   container.innerHTML = html;
 }
 
-/* ============ 今日视图 ============ */
 function getArchiveCutoff(){
   const d = new Date();
   d.setDate(d.getDate() - 7);
@@ -1554,7 +1471,6 @@ function confirmDeleteHabit(id){
   });
 }
 
-/* ============ 新增 / 编辑 / 删除 ============ */
 function saveNewItem(){
   const dict = TRANSLATIONS[currentLang] || TRANSLATIONS.zh;
   const input = document.getElementById('habitInput');
@@ -1615,11 +1531,95 @@ function deleteShortTermItem(){
   });
 }
 
-/* ============ 初始化 ============ */
 loadData();
 applyLanguage();
 setupBackButtonInterception();
 setupDelegation();
+</script>
+
+<!-- 公告 + 更新（轻鸽） -->
+<script>
+(function () {
+  var ADMIN = '194911';
+  var BASE = 'https://qght.cn/echouser.php?admin=' + ADMIN + '&file=';
+
+  var metaEl = document.querySelector('meta[name="app-version"]');
+  var CUR = metaEl ? metaEl.content.trim() : '0';
+
+  function get(name) {
+    return fetch(BASE + name + '&t=' + Date.now())
+      .then(function (r) { return r.text(); })
+      .then(function (t) { return (t || '').trim(); })
+      .catch(function () { return ''; });
+  }
+
+  function show(title, content, isUpdate, link) {
+    var modal = document.getElementById('announcementModal');
+    if (!modal) return;
+    document.getElementById('announcementTitle').innerText = title;
+    document.getElementById('announcementContent').innerText = content;
+
+    var a = document.getElementById('announcementDismiss');
+    var b = document.getElementById('announcementClose');
+
+    if (isUpdate) {
+      a.innerText = '稍后';
+      b.innerText = '立即下载';
+      a.onclick = function () { modal.style.display = 'none'; };
+      b.onclick = function () {
+        modal.style.display = 'none';
+        if (link) window.open(link, '_blank');
+      };
+    } else {
+      a.innerText = '不再显示';
+      b.innerText = '关闭';
+      a.onclick = function () {
+        modal.style.display = 'none';
+        try { localStorage.setItem('noticeRead', content); } catch(e) {}
+      };
+      b.onclick = function () { modal.style.display = 'none'; };
+    }
+
+    modal.style.display = 'flex';
+  }
+
+  function compareVersion(a, b) {
+    var pa = String(a).split('.').map(function(x){ return parseInt(x, 10) || 0; });
+    var pb = String(b).split('.').map(function(x){ return parseInt(x, 10) || 0; });
+    for (var i = 0; i < Math.max(pa.length, pb.length); i++) {
+      var va = pa[i] || 0, vb = pb[i] || 0;
+      if (va > vb) return 1;
+      if (va < vb) return -1;
+    }
+    return 0;
+  }
+
+  get('new').then(function (text) {
+    if (!text) return;
+
+    var mVer = text.match(/软件版本[:：]\s*[（(]([^）)]+)[）)]/);
+    var mContent = text.match(/更新内容[:：]\s*[（(]([^）)]+)[）)]/);
+    var mLink = text.match(/更新链接[:：]\s*[（(]([^）)]+)[）)]/);
+
+    if (!mVer) return;
+
+    var LATEST = mVer[1].trim();
+    var CONTENT = mContent ? mContent[1].trim() : '';
+    var LINK = mLink ? mLink[1].trim() : '';
+
+    if (compareVersion(CUR, LATEST) < 0) {
+      var body = CONTENT;
+      if (LINK) body += '\n\n下载链接：\n' + LINK;
+      show('发现新版本 ' + LATEST, body, true, LINK);
+    } else {
+      get('notice').then(function (n) {
+        if (!n || n === 'NONE' || n.indexOf('不存在') >= 0) return;
+        try { if (localStorage.getItem('noticeRead') === n) return; } catch(e) {}
+        show('公告', n);
+      });
+    }
+  });
+})();
 </script>
 </body>
 </html>
