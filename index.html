@@ -197,6 +197,45 @@ body.dark-mode .long-term-empty{color:#999;}
 .stats-edit-btn.delete{background:var(--danger-bg);color:var(--danger-color)}
 .reminder-option {padding: 8px 14px;border-radius: 12px;background: var(--light-gray);color: var(--text-color);font-size: 13px;font-weight: 500;cursor: pointer;border: 1.5px solid transparent;display: flex;justify-content: center;align-items: center;}
 .reminder-option.active {background: var(--text-color);color: var(--bg-color);}
+/* === Emoji 选择面板 === */
+.emoji-section{width:100%;margin-top:5px;}
+.emoji-section-label{font-size:12px;color:var(--sub-text);margin-bottom:8px;display:block;font-weight:500;}
+.emoji-selected-row{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+.emoji-selected-preview{width:44px;height:44px;border-radius:12px;background:var(--light-gray);display:flex;justify-content:center;align-items:center;font-size:26px;flex-shrink:0;}
+.emoji-grid{display:grid;grid-template-columns:repeat(8,1fr);gap:4px;max-height:140px;overflow-y:auto;padding:6px;background:var(--light-gray);border-radius:10px;}
+.emoji-btn{font-size:20px;text-align:center;padding:6px 0;border-radius:8px;cursor:pointer;transition:all .15s;user-select:none;line-height:1;}
+.emoji-btn:active,.emoji-btn.active{background:var(--text-color);transform:scale(0.9);}
+body.dark-mode .emoji-btn:active,body.dark-mode .emoji-btn.active{color:var(--bg-color);}
+/* === 编辑按钮可见化 === */
+.edit-btn{width:28px;height:28px;border-radius:50%;background:var(--light-gray);color:var(--sub-text);font-size:16px;display:flex;justify-content:center;align-items:center;cursor:pointer;opacity:.6;transition:all .2s;}
+.edit-btn:active,.edit-btn:hover{opacity:1;color:var(--text-color);background:rgba(0,0,0,.1);}
+body.dark-mode .edit-btn:active,body.dark-mode .edit-btn:hover{background:rgba(255,255,255,.15);}
+/* === 撤销按钮 === */
+.undo-toast{display:flex;align-items:center;gap:12px;background:rgba(0,0,0,.85)!important;padding:12px 18px!important;}
+.undo-btn{color:#ffd700;font-weight:700;font-size:14px;cursor:pointer;text-decoration:underline;flex-shrink:0;}
+/* === 拖拽排序 === */
+.drag-handle{width:22px;height:22px;color:var(--sub-text);font-size:18px;display:flex;justify-content:center;align-items:center;cursor:grab;user-select:none;opacity:.4;transition:opacity .2s;flex-shrink:0;}
+.drag-handle:active{cursor:grabbing;opacity:.8;}
+.habit-item.dragging{opacity:.4;transform:scale(.98);}
+.habit-item.drag-over{border:2px dashed var(--text-color)!important;background:rgba(0,0,0,.05)!important;}
+body.dark-mode .habit-item.drag-over{background:rgba(255,255,255,.08)!important;}
+/* === 连续打卡可视化 === */
+.streak-hero{background:linear-gradient(135deg,#ff6b35,#ff9a56);border-radius:20px;padding:28px 20px;text-align:center;color:#fff;margin-bottom:20px;position:relative;overflow:hidden;box-shadow:0 8px 24px rgba(255,107,53,.3);}
+body.dark-mode .streak-hero{background:linear-gradient(135deg,#ff6b35,#ff4500);}
+.streak-hero::before{content:'🔥';position:absolute;right:-10px;bottom:-20px;font-size:100px;opacity:.2;}
+.streak-hero-num{font-size:64px;font-weight:900;line-height:1;text-shadow:0 2px 8px rgba(0,0,0,.2);}
+.streak-hero-label{font-size:14px;font-weight:600;margin-top:4px;opacity:.9;letter-spacing:2px;}
+.streak-hero-sub{font-size:12px;margin-top:6px;opacity:.8;}
+/* === 周热力图 === */
+.heatmap-section{margin-bottom:15px;}
+.heatmap-title{font-size:13px;font-weight:600;color:var(--sub-text);margin-bottom:10px;}
+.heatmap{display:flex;gap:3px;overflow-x:auto;padding-bottom:2px;}
+.heatmap-week{display:flex;flex-direction:column;gap:3px;}
+.heatmap-cell{width:12px;height:12px;border-radius:2px;cursor:pointer;transition:transform .15s;flex-shrink:0;}
+.heatmap-cell:active{transform:scale(1.5);}
+body.dark-mode .heatmap-cell{border:1px solid rgba(255,255,255,.1);}
+.heatmap-legend{display:flex;align-items:center;gap:4px;margin-top:8px;font-size:11px;color:var(--sub-text);}
+.heatmap-legend .heatmap-cell{width:10px;height:10px;}
 </style>
 </head>
 <body>
@@ -253,6 +292,15 @@ body.dark-mode .long-term-empty{color:#999;}
       <button class="modal-close-btn" onclick="clickAction('closeAdd')">✕</button>
       <div class="modal-title" id="modalTitle" data-i18n="addTask">添加任务</div>
       <input type="text" class="modal-input" id="habitInput" placeholder="输入名称，例如：跑步" data-i18n-placeholder="inputNamePlaceholder" autocomplete="off">
+      <!-- Emoji 自选面板 -->
+      <div class="emoji-section" id="emojiPickerSection" style="width:100%;">
+        <span class="emoji-section-label">选择图标（也可直接输入 Emoji）</span>
+        <div class="emoji-selected-row">
+          <div class="emoji-selected-preview" id="emojiPreview">📌</div>
+          <div style="font-size:12px;color:var(--sub-text);flex:1;">选中的图标</div>
+        </div>
+        <div class="emoji-grid" id="emojiGrid"></div>
+      </div>
       <div id="reminderSection" style="width:100%; margin-top:-5px; text-align:left;">
         <label style="font-size:12px; color:var(--sub-text); margin-bottom:8px; display:block;" data-i18n="reminderLabel">定时提醒</label>
         <input type="hidden" id="habitReminder" value="0">
@@ -298,6 +346,26 @@ body.dark-mode .long-term-empty{color:#999;}
     <div class="modal-box">
       <button class="modal-close-btn" onclick="clickAction('closeStats')">✕</button>
       <div class="modal-title" data-i18n="statsTitle">打卡统计</div>
+      <!-- 🔥 连续打卡大卡 -->
+      <div class="streak-hero" id="streakHero">
+        <div class="streak-hero-num" id="streakHeroNum">0</div>
+        <div class="streak-hero-label" id="streakHeroLabel">连续打卡天数</div>
+        <div class="streak-hero-sub" id="streakHeroSub">继续保持！</div>
+      </div>
+      <!-- 本周热力图 -->
+      <div class="heatmap-section" id="heatmapSection">
+        <div class="heatmap-title">📅 近 12 周打卡热力</div>
+        <div class="heatmap" id="heatmapGrid"></div>
+        <div class="heatmap-legend">
+          <span>少</span>
+          <div class="heatmap-cell" style="background:var(--light-gray)"></div>
+          <div class="heatmap-cell" style="background:#ffd9b3"></div>
+          <div class="heatmap-cell" style="background:#ffae7a"></div>
+          <div class="heatmap-cell" style="background:#ff7b3a"></div>
+          <div class="heatmap-cell" style="background:#ff4500"></div>
+          <span>多</span>
+        </div>
+      </div>
       <div class="stats-summary">
         <div class="stats-card"><div class="num" id="statsMonthTotal">0</div><div class="label" data-i18n="statsMonthLabel">本月打卡</div></div>
         <div class="stats-card"><div class="num" id="statsStreakTotal">0</div><div class="label" data-i18n="statsStreakLabel">连续打卡</div></div>
@@ -465,23 +533,78 @@ body.dark-mode .long-term-empty{color:#999;}
       <div class="modal-btns"><button class="modal-btn-save" onclick="doImportPaste()" data-i18n="confirmImport">确认导入</button></div>
     </div>
   </div><script>
-// --- 核心 API 配置 ---
-const POTATO_ASK_KEY = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhcHBJZCI6MTI3MTQ2Mzg0MjIwOTY4MTQwOCwiZ2V0TWFuYWdlbWVudElkIjoxMjcxNDYyMTAwNTE2NTU2ODAwLCJUSU1FIjoxNzkyMjUyMjEyODc4fQ.TpS7iWf0W0U_3jsNbXS4bxTP6P4VCG4px3rmm_qQjrM';
-const POTATO_SIGN_KEY = '123456qwE', POTATO_AES_KEY = '1234567890abcdef', POTATO_BASE_URL = 'https://api.potatocloud.cn';
+// ============================================================
+// 📦 全局配置区 —— 所有常量集中在此，方便维护
+// ============================================================
+const CONFIG = {
+  // --- 土豆 API ---
+  API: {
+    ASK_KEY: 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhcHBJZCI6MTI3MTQ2Mzg0MjIwOTY4MTQwOCwiZ2V0TWFuYWdlbWVudElkIjoxMjcxNDYyMTAwNTE2NTU2ODAwLCJUSU1FIjoxNzkyMjUyMjEyODc4fQ.TpS7iWf0W0U_3jsNbXS4bxTP6P4VCG4px3rmm_qQjrM',
+    SIGN_KEY: '123456qwE',
+    AES_KEY: '1234567890abcdef',
+    BASE_URL: 'https://api.potatocloud.cn',
+    TIMEOUT_MS: 8000,
+    MAX_RETRY: 2,          // 指数退避重试次数
+    RETRY_BASE_MS: 1000,   // 重试初始间隔
+    CONFLICT_THRESHOLD: 60000, // 1分钟内视为同时修改
+  },
+  // --- 存储 Key ---
+  STORAGE: {
+    DATA: 'tickDailyData',
+    TOKEN: 'potato_token',
+    USER: 'qg_user',
+    LANG: 'currentLang',
+    DARK_MODE: 'darkModeEnabled',
+    AVATAR: 'userAvatar',
+    BG_IMAGE: 'userBgImage',
+    BG_OPACITY: 'bgOpacity',
+    NOTICE_READ: 'noticeRead',
+    LAST_WRITE: 'tickDailyLastWrite',
+  },
+  // --- 视觉常量 ---
+  THEME: {
+    DEFAULT_COLOR: '#000000',
+    COLOR_PALETTE: ['#000000', '#FF0000', '#0000FF', '#008000', '#FFA500', '#800080', '#FFC0CB', '#00CED1', '#34C759', '#FF6B6B', '#FFD700', '#A855F7'],
+    COLOR_RE: /^#[0-9A-Fa-f]{6}$/,
+  },
+  // --- 业务常量 ---
+  BUSINESS: {
+    DEFAULT_ICON: '📌',
+    ICON_POOL: ['📚','💪','🧘','🎨','✍️','🏃','🎯','🧠','💻','🎵','🌱','🍳','🚰','😴','🧹','💊','🌸','📖','🏋️','🎹'],
+    MAX_FILL_DAYS: 5000,
+    CLOUD_SYNC_DEBOUNCE_MS: 800,
+    UNDO_TIMEOUT_MS: 5000,      // 撤销按钮显示时长
+  },
+  // --- Emoji 面板（新增功能）---
+  EMOJI_CATEGORIES: {
+    '常用': ['📌','📚','💪','🧘','🎨','✍️','🏃','🎯','🧠','💻','🎵','🌱','🍳','🚰','😴','🧹','💊','🌸','📖','🏋️','🎹','🎮','📷','🎬','☕','🥤','🍎','🐶','🐱','⭐','🔥','💧','❤️','✨','🎉','💯','🏆','💡','🌙','☀️'],
+  },
+};
+
+// 向后兼容的便捷别名
+const POTATO_ASK_KEY = CONFIG.API.ASK_KEY,
+      POTATO_SIGN_KEY = CONFIG.API.SIGN_KEY,
+      POTATO_AES_KEY = CONFIG.API.AES_KEY,
+      POTATO_BASE_URL = CONFIG.API.BASE_URL;
 
 function getAesKey(t) { let e = String(t); for (; e.length < 32;) e += '0'; return CryptoJS.enc.Utf8.parse(e.slice(0, 32)) }
 function encryptValue(t, e) { if (t == null) return t; let n = getAesKey(e); return CryptoJS.AES.encrypt(String(t), n, { mode: CryptoJS.mode.ECB, padding: CryptoJS.pad.Pkcs7 }).toString() }
 function decryptResponse(t, e) { try { let n = getAesKey(e), o = CryptoJS.AES.decrypt(t, n, { mode: CryptoJS.mode.ECB, padding: CryptoJS.pad.Pkcs7 }).toString(CryptoJS.enc.Utf8); return o ? JSON.parse(o) : null } catch (a) { return null } }
 
-async function potatoRequest(endpoint, data = {}, method = 'POST') {
+// 网络状态感知
+const isOnline = () => navigator.onLine !== false;
+
+async function potatoRequest(endpoint, data = {}, method = 'POST', _retryCount = 0) {
   try {
+    if (!isOnline()) return { code: 'offline', message: '当前无网络连接' };
+
     const time = Date.now().toString();
     const nonce = (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : Math.random().toString(36).slice(2);
-    const sign = CryptoJS.MD5(POTATO_SIGN_KEY + time).toString();
-    const token = localStorage.getItem('potato_token');
-    let headers = { 'askKey': POTATO_ASK_KEY, 'time': time, 'sign': sign, 'nonce': nonce };
+    const sign = CryptoJS.MD5(CONFIG.API.SIGN_KEY + time).toString();
+    const token = localStorage.getItem(CONFIG.STORAGE.TOKEN);
+    let headers = { 'askKey': CONFIG.API.ASK_KEY, 'time': time, 'sign': sign, 'nonce': nonce };
     if (token) headers['apiUserToken'] = token;
-    let url = `${POTATO_BASE_URL}${endpoint}`;
+    let url = `${CONFIG.API.BASE_URL}${endpoint}`;
     let fetchOptions = { method: method, headers: headers, cache: 'no-store' };
     if (method === 'GET') {
       const params = new URLSearchParams(data);
@@ -490,21 +613,27 @@ async function potatoRequest(endpoint, data = {}, method = 'POST') {
     } else {
       headers['Content-Type'] = 'application/json';
       const encryptedBody = {};
-      for (const key in data) { if (data.hasOwnProperty(key)) { encryptedBody[key] = encryptValue(data[key], POTATO_AES_KEY); } }
+      for (const key in data) { if (data.hasOwnProperty(key)) { encryptedBody[key] = encryptValue(data[key], CONFIG.API.AES_KEY); } }
       fetchOptions.body = JSON.stringify(encryptedBody);
     }
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 8000);
+    const timeoutId = setTimeout(() => controller.abort(), CONFIG.API.TIMEOUT_MS);
     fetchOptions.signal = controller.signal;
     let res;
     try { res = await fetch(url, fetchOptions); } finally { clearTimeout(timeoutId); }
     const text = await res.text();
     if (!text) return { code: res.status.toString(), message: '空响应' };
-    let json = decryptResponse(text, POTATO_AES_KEY);
+    let json = decryptResponse(text, CONFIG.API.AES_KEY);
     if (!json) { try { json = JSON.parse(text); } catch (e) { return { code: res.status.toString(), message: '解析失败' }; } }
     if (json && json.code) json.code = String(json.code);
     return json;
   } catch (err) {
+    // 指数退避重试（仅对网络错误重试，不对业务错误重试）
+    if (_retryCount < CONFIG.API.MAX_RETRY && !err.name?.includes('Abort')) {
+      const delay = CONFIG.API.RETRY_BASE_MS * Math.pow(2, _retryCount);
+      await new Promise(r => setTimeout(r, delay));
+      return potatoRequest(endpoint, data, method, _retryCount + 1);
+    }
     return { code: 'error', message: err.message };
   }
 }
@@ -570,9 +699,14 @@ const TRANSLATIONS = {
   en: { today: 'Today', calendar: 'Calendar', noHabits: '{n} Habits', startFirst: 'Start Your First', monthCheckins: 'Month', streakCheckins: 'Streak', dayUnit: 'Days', pending: 'To Do', completed: 'Completed', archived: 'Archived', noPendingTasks: 'No tasks', noCompletedTasks: 'No completed', noArchivedTasks: 'No archived', todayTask: 'Today', completedOn: 'Done on {d}', addTask: 'Add Task', addLongProject: 'Add Project', addShortTask: 'Add Task', inputNamePlaceholder: 'e.g., Running', add: 'Add', editLongProject: 'Edit Project', editShortTask: 'Edit Task', namePlaceholder: 'Name', iconPlaceholder: 'Icon (e.g. 🏃)', daysLabel: 'Days', dotColorLabel: 'Color:', deleteProject: 'Delete Project', deleteTask: '🗑️ Delete Task', save: 'Save', selectCheckinProject: 'Select Project:', setCheckinQuestion: 'Check-in?', selectFirst: 'Select first', cancelSelection: 'Cancel', confirmCheckin: 'Confirm', cancelCheckin: 'Cancel', resetApp: 'Reset App', resetConfirmMsg: 'Clear all data?', resetOk: 'Reset', darkMode: 'Dark Mode', on: 'On', off: 'Off', exportData: 'Export', importData: 'Import', exportDesc: 'Copy or save to file', importDesc: 'Choose file or paste text', dataBackup: 'Backup', exportDataMenu: 'Export Data', exportToFile: '💾 Save to File', copyToClipboard: '📋 Copy to Clipboard', exportSuccess: '✅ Copied!', exportFileSuccess: '✅ Saved to downloads', exportFileFail: 'Save failed', importDataMenu: 'Import Data', importFromFile: '📁 From File', importFromClipboard: '📋 Paste Text', pickAvatar: 'Avatar', takePhoto: 'Camera', chooseFile: 'Gallery', pasteImportTitle: 'Paste Data', pasteImportHint: 'Paste backup here:', confirmImport: 'Import', resetItem: 'Reset to initial state', helpCenter: 'Help Center', joinGroup: 'Join Group', supportAuthor: 'Buy me a coffee', language: 'Language', notificationPerm: 'Notification', hintTitle: 'Hint', warning: 'Warning', okBtn: 'OK', cancelBtn: 'Cancel', deleteTitle: 'Delete', deleteBtn: 'Delete', deleteHabitMsg: 'Delete "{name}"?', deleteLongMsg: 'Delete this project and all records?', deleteShortMsg: 'Delete this task?', noLongTermHint: 'No projects yet. Click + to add.', selectProjectHint: 'Select a project first.', nameEmptyHint: 'Name cannot be empty!', inputNameHint: 'Enter name!', invalidDaysHint: 'Invalid days!', invalidReminderHours: 'Please enter a valid reminder hours (> 0)', fillLimitHint: 'Limit reached (5000 days)', reduceDaysWarn: 'Reducing days will delete older records. Continue?', importSuccess: '✅ Import successful!', importFailPrefix: '❌ Import failed: ', invalidData: 'Invalid format', imageFail: 'Image read failed.', noLongTerm: 'No projects. Click + to add', projectDays: 'Persisted <b>{n}</b> days', futureDateHint: 'Cannot check-in future dates.', statsTitle: 'Stats', statsMonthLabel: 'Month', statsStreakLabel: 'Streak', statsProjectLabel: 'Projects', statsPerProject: 'Details (Click to edit)', statsThisMonth: 'Month', statsStreak: 'Streak', statsTotal: 'Total', statsEditName: 'Name', statsEditIcon: 'Icon', statsEditColor: 'Color', statsEditDays: 'Days', statsEditSave: 'Save', statsEditDelete: 'Delete', notLoggedIn: 'Not Logged In', clickToLogin: 'Click to Login / Register', nicknameEditable: 'Nickname editable', authTitle: '👤 Login / Register', authHint: 'Guest mode available. Login to sync data.', login: 'Login', register: 'Register', usernamePlaceholder: 'Username', passwordPlaceholder: 'Password', regUserPlaceholder: 'Username', regUserHint: '6-16 chars', regUserChars: 'letters, numbers', regPassPlaceholder: 'Password', regPassHint: '6-16 chars', regNamePlaceholder: 'Nickname (Optional)', logout: 'Logout', logoutConfirmMsg: 'Logout? Guest mode still available.', loggedOut: 'Logged out', welcomeBack: '✅ Welcome ', registerSuccess: '✅ Registered! Please login', enterUserPass: 'Enter username & password', enterUserPass2: 'Cannot be empty', invalidUsername: '❌ Invalid username', userLenHint: '❌ Username length 6-16', passLenHint: '❌ Password length 6-16', serverReturn: '❌ Server: ', networkError: '❌ Network: ', requestBusy: 'Processing...', bgStyle: 'Background', pickBg: 'Choose Image', removeBg: 'Reset Default', bgOpacity: 'Opacity:', bgOpacityHint: '0 is fully transparent; 1 is fully opaque.', reminderLabel: 'Reminder', reminder0: 'None', reminder1: '1h', reminder4: '4h', reminder8: '8h', reminder12: '12h', reminder24: '24h', reminderCustom: 'Custom' }
 };
 
-let currentLang = localStorage.getItem('currentLang') || 'zh';
-let DEFAULT_COLOR = '#000000', DEFAULT_ICON = '📌', ICON_POOL = ['📚', '💪', '🧘', '🎨', '✍️', '🏃', '🎯', '🧠', '💻'];
-let COLOR_RE = /^#[0-9A-Fa-f]{6}$/, COLOR_PALETTE = ['#000000', '#FF0000', '#0000FF', '#008000', '#FFA500', '#800080', '#FFC0CB', '#00FFFF'], MAX_FILL_DAYS = 5000;
+let currentLang = localStorage.getItem(CONFIG.STORAGE.LANG) || 'zh';
+// 向后兼容的常量别名
+const DEFAULT_COLOR = CONFIG.THEME.DEFAULT_COLOR;
+const DEFAULT_ICON = CONFIG.BUSINESS.DEFAULT_ICON;
+const ICON_POOL = CONFIG.BUSINESS.ICON_POOL;
+const COLOR_RE = CONFIG.THEME.COLOR_RE;
+const COLOR_PALETTE = CONFIG.THEME.COLOR_PALETTE;
+const MAX_FILL_DAYS = CONFIG.BUSINESS.MAX_FILL_DAYS;
 
 const uid = () => { try { if (window.crypto && typeof window.crypto.randomUUID === 'function') return window.crypto.randomUUID(); } catch (t) {} return Date.now().toString(36) + Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2); };
 function escapeHtml(t) { return String(t == null ? '' : t).replace(/[&<>"']/g, e => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[e])) }
@@ -589,10 +723,34 @@ function formatShortDate(t) { if (!t) return ''; let [e, n, o] = t.split('-'); r
 
 let habits = [], longTermProjects = [], calDate = new Date(), currentEditingId = null, selectedDateStr = '', confirmCallback = null, confirmCancelCallback = null, selectedProjectIdForCheckin = null, currentTab = 'today', expandedStatsId = null, authBusy = false, _cloudTimer = null;
 
-function saveData() { try { localStorage.setItem('tickDailyData', JSON.stringify({ habits, longTermProjects })); clearTimeout(_cloudTimer); _cloudTimer = setTimeout(() => { saveToCloud(); }, 800); } catch (t) {} }
-function loadData() { try { let t = localStorage.getItem('tickDailyData'); if (t) { let e = JSON.parse(t); habits = Array.isArray(e.habits) ? e.habits : []; longTermProjects = Array.isArray(e.longTermProjects) ? e.longTermProjects : []; longTermProjects.forEach(n => { (!n.color || !COLOR_RE.test(n.color)) && (n.color = DEFAULT_COLOR); Array.isArray(n.checkins) || (n.checkins = []); }); habits.forEach(n => { n.icon || (n.icon = DEFAULT_ICON); typeof n.checked != 'boolean' && (n.checked = false); n.createdAt || (n.createdAt = getTodayStr()); n.checked && !n.completedAt && (n.completedAt = getTodayStr()); }); } else habits = [], longTermProjects = []; } catch (t) { habits = []; longTermProjects = []; } }
+function saveData() {
+  try {
+    const now = Date.now();
+    localStorage.setItem(CONFIG.STORAGE.DATA, JSON.stringify({ habits, longTermProjects }));
+    localStorage.setItem(CONFIG.STORAGE.LAST_WRITE, now.toString());
+    clearTimeout(_cloudTimer);
+    _cloudTimer = setTimeout(() => { saveToCloud(); }, CONFIG.BUSINESS.CLOUD_SYNC_DEBOUNCE_MS);
+  } catch (t) {}
+}
+function loadData() {
+  try {
+    let t = localStorage.getItem(CONFIG.STORAGE.DATA);
+    if (t) {
+      let e = JSON.parse(t);
+      habits = Array.isArray(e.habits) ? e.habits : [];
+      longTermProjects = Array.isArray(e.longTermProjects) ? e.longTermProjects : [];
+      longTermProjects.forEach(n => { (!n.color || !COLOR_RE.test(n.color)) && (n.color = DEFAULT_COLOR); Array.isArray(n.checkins) || (n.checkins = []); });
+      habits.forEach(n => { n.icon || (n.icon = DEFAULT_ICON); typeof n.checked != 'boolean' && (n.checked = false); n.createdAt || (n.createdAt = getTodayStr()); n.checked && !n.completedAt && (n.completedAt = getTodayStr()); });
+    } else habits = [], longTermProjects = [];
+  } catch (t) { habits = []; longTermProjects = []; }
+}
 
-function toggleLanguage() { currentLang = currentLang === 'zh' ? 'en' : 'zh'; localStorage.setItem('currentLang', currentLang); document.getElementById('langToggleBtn').innerText = currentLang === 'zh' ? 'English' : '中文'; applyLanguage(); }
+function toggleLanguage() {
+  currentLang = currentLang === 'zh' ? 'en' : 'zh';
+  localStorage.setItem(CONFIG.STORAGE.LANG, currentLang);
+  document.getElementById('langToggleBtn').innerText = currentLang === 'zh' ? 'English' : '中文';
+  applyLanguage();
+}
 function applyLanguage() {
   document.querySelectorAll('[data-i18n]').forEach(t => { let e = t.getAttribute('data-i18n'); if (e) t.innerText = translate(e); });
   document.querySelectorAll('[data-i18n-placeholder]').forEach(t => { let e = t.getAttribute('data-i18n-placeholder'); if (e) t.setAttribute('placeholder', translate(e)); });
@@ -649,13 +807,218 @@ async function saveUserName() { let t = document.getElementById('userNameDisplay
 (function () { let t = document.getElementById('userNameDisplay'); if (t) t.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); t.blur(); } }); })();
 function toggleSettings() { let t = document.getElementById('settingsModal'); if (t.style.display === 'flex') { let e = document.getElementById('qrModal'); if (e) e.remove(); let n = document.getElementById('faqModal'); if (n) n.remove(); t.style.display = 'none'; showMainChrome(); clearHash(); } else { updateUserStatusUI(); loadAvatar(); updateNotificationStatusUI(); t.style.display = 'flex'; document.getElementById('mainHeader').style.display = 'none'; document.getElementById('mainBottomNav').style.display = 'none'; window.location.hash = '#modal'; } }
 
-function saveToCloud() { let t = localStorage.getItem('potato_token'); if (!t) return; let e = JSON.stringify({ habits: habits.map(h => ({ i: h.id, n: h.name, c: h.checked, d: h.completedAt, ic: h.icon, cr: h.createdAt, dh: h.delayHours || 0 })), longTermProjects: longTermProjects.map(p => ({ i: p.id, n: p.name, ic: p.icon, c: p.color, ck: p.checkins })), version: 3 }); try { potatoRequest('/api/setUserData', { key: 'tickData', value: e }); } catch (n) {} }
-async function syncCloudData() { let t = localStorage.getItem('potato_token'); if (!t) return; showToast('正在同步云端数据...', 1500); try { let e = await potatoRequest('/api/getUserData', { key: 'tickData' }); if (e && e.code === '200' && e.data && e.data.value) { let n = JSON.parse(e.data.value); if (n) { if (Array.isArray(n.habits)) habits = n.habits.map(h => ({ id: h.i, name: h.n, checked: h.c, completedAt: h.d, icon: h.ic, createdAt: h.cr || h.d || getTodayStr(), delayHours: h.dh || 0 })); if (Array.isArray(n.longTermProjects)) longTermProjects = n.longTermProjects.map(p => ({ id: p.i, name: p.n, icon: p.ic, color: p.c, checkins: p.ck || [] })); localStorage.setItem('tickDailyData', JSON.stringify({ habits, longTermProjects })); renderHabits(); renderCalendar(); showToast('✅ 云端数据已同步'); } } } catch (e) {} }
+// ============ 云同步：带冲突检测 ============
+async function saveToCloud() {
+  let token = localStorage.getItem(CONFIG.STORAGE.TOKEN);
+  if (!token) return;
+  let lastWrite = parseInt(localStorage.getItem(CONFIG.STORAGE.LAST_WRITE) || '0', 10);
+  let payload = JSON.stringify({
+    habits: habits.map(h => ({ i: h.id, n: h.name, c: h.checked, d: h.completedAt, ic: h.icon, cr: h.createdAt, dh: h.delayHours || 0 })),
+    longTermProjects: longTermProjects.map(p => ({ i: p.id, n: p.name, ic: p.icon, c: p.color, ck: p.checkins })),
+    version: 3,
+    lastWrite: Date.now()
+  });
+  try {
+    await potatoRequest('/api/setUserData', { key: 'tickData', value: payload });
+  } catch (n) {
+    // 静默失败，下次再同步
+  }
+}
+
+async function syncCloudData() {
+  let token = localStorage.getItem(CONFIG.STORAGE.TOKEN);
+  if (!token) return;
+  showToast('🔄 正在同步云端数据...', 2000);
+  try {
+    let res = await potatoRequest('/api/getUserData', { key: 'tickData' });
+    if (!res || res.code !== '200' || !res.data || !res.data.value) {
+      showToast('⚠️ 云端暂无数据');
+      return;
+    }
+    let cloudData = JSON.parse(res.data.value);
+    if (!cloudData) return;
+
+    // 冲突检测：比较 lastWrite 时间戳
+    const cloudWrite = cloudData.lastWrite || 0;
+    const localWrite = parseInt(localStorage.getItem(CONFIG.STORAGE.LAST_WRITE) || '0', 10);
+
+    // 如果差距在阈值内，视为同时修改，让用户选择
+    if (localWrite && cloudWrite && Math.abs(localWrite - cloudWrite) < CONFIG.API.CONFLICT_THRESHOLD) {
+      showCustomConfirm(
+        '⚡ 数据冲突',
+        '检测到多台设备几乎同时修改了数据，建议以时间较新的为准：\n本地: ' + new Date(localWrite).toLocaleString() + '\n云端: ' + new Date(cloudWrite).toLocaleString(),
+        '以最新为准',
+        true,
+        async () => {
+          if (cloudWrite >= localWrite) {
+            applyCloudData(cloudData);
+            showToast('✅ 已采用云端数据');
+          } else {
+            await saveToCloud();
+            showToast('✅ 已将本地数据覆盖云端');
+          }
+        },
+        async () => {
+          await saveToCloud();
+          showToast('✅ 已将本地数据覆盖云端');
+        }
+      );
+      return;
+    }
+
+    // 正常合并策略：云端更新
+    if (cloudWrite > localWrite) {
+      applyCloudData(cloudData);
+      showToast('✅ 云端数据已同步');
+    } else {
+      // 本地更新，推送到云端
+      await saveToCloud();
+      showToast('✅ 本地数据已上传');
+    }
+  } catch (e) {
+    if (e.message?.includes('network') || e.message?.includes('NetworkError')) {
+      showToast('⚠️ 网络异常，稍后自动重试');
+    } else {
+      showToast('❌ 同步失败：' + (e.message || '未知错误'), 3000);
+    }
+  }
+}
+
+function applyCloudData(cloudData) {
+  if (Array.isArray(cloudData.habits)) {
+    habits = cloudData.habits.map(h => ({
+      id: h.i, name: h.n, checked: h.c, completedAt: h.d,
+      icon: h.ic, createdAt: h.cr || h.d || getTodayStr(), delayHours: h.dh || 0
+    }));
+  }
+  if (Array.isArray(cloudData.longTermProjects)) {
+    longTermProjects = cloudData.longTermProjects.map(p => ({
+      id: p.i, name: p.n, icon: p.ic, color: p.c, checkins: p.ck || []
+    }));
+  }
+  localStorage.setItem(CONFIG.STORAGE.DATA, JSON.stringify({ habits, longTermProjects }));
+  localStorage.setItem(CONFIG.STORAGE.LAST_WRITE, (cloudData.lastWrite || Date.now()).toString());
+  renderHabits();
+  renderCalendar();
+}
 async function doLogin() { if (authBusy) return; let t = document.getElementById('authUser').value.trim(), e = document.getElementById('authPass').value.trim(); if (!t || !e) { showToast('请输入账号和密码'); return; } authBusy = true; try { let n = await potatoRequest('/api/login', { userNumber: t, passWord: e }); if (n && n.code === '200') { let o = n.data?.apiUserToken || n.data?.token || n.apiUserToken; if (o) localStorage.setItem('potato_token', o); let a = n.data?.userName || n.data?.nickname || t; localStorage.setItem('qg_user', JSON.stringify({ user: t, name: a })); updateUserStatusUI(); closeModal('authModal'); showToast('✅ 登录成功，欢迎 ' + a); await fetchPotatoUserProfile(); const hasLocal = habits.length > 0 || longTermProjects.length > 0; if (hasLocal) { showCustomConfirm('同步数据', '本地已有数据。点击“覆盖云端”将上传本地；点击“取消”将拉取云端数据覆盖本地。', '覆盖云端', true, async () => { await saveToCloud(); showToast('✅ 本地数据已上传'); }, async () => { await syncCloudData(); showToast('✅ 云端数据已拉取'); }); } else { await syncCloudData(); } } else { showToast('❌ ' + (n?.message || '登录失败'), 3500); } } catch (n) { showToast('请求失败：' + n.message, 3000); } finally { authBusy = false; } }
 async function doRegister() { if (authBusy) return; let t = document.getElementById('regUsername').value.trim(), e = document.getElementById('regPass').value.trim(), n = document.getElementById('regName').value.trim(); if (!t || !e) { showToast('请填写账号和密码'); return; } if (e.length < 6 || e.length > 16) { showToast('密码长度需 6-16 位'); return; } if (t.length < 6 || t.length > 16) { showToast('用户名长度需 6-16 位'); return; } authBusy = true; try { let o = await potatoRequest('/api/registerV2', { userNumber: t, passWord: e, nickname: n || t, userName: n || t }); if (o && o.code === '200') { showToast('✅ 注册成功，请登录'); document.getElementById('authUser').value = t; document.getElementById('authPass').value = e; switchAuthTab('login'); } else { showToast('❌ ' + (o?.message || '注册失败'), 4000); } } catch (o) { showToast('请求失败：' + o.message, 3000); } finally { authBusy = false; } }
 async function fetchPotatoUserProfile() { try { let t = await potatoRequest('/api/findUserInfo', {}); if (t.code === '200' && t.data) { let e = t.data, n = e.userName || e.userNumber || '用户', o = document.getElementById('userNameDisplay'); if (o) o.innerText = n; if (e.headImg) { document.getElementById('avatarPreview').src = e.headImg; document.getElementById('avatarPreview').classList.add('loaded'); localStorage.setItem('userAvatar', e.headImg); } localStorage.setItem('qg_user', JSON.stringify({ user: e.userNumber, name: n })); updateUserStatusUI(); } } catch (t) {} }
 function switchAuthTab(t) { let e = document.getElementById('loginForm'), n = document.getElementById('registerForm'), a = document.getElementById('loginTab'), i = document.getElementById('registerTab'), s = document.getElementById('authTabsBox'), c = document.getElementById('authTitleText'); if (!e || !n) return; e.style.display = 'none'; n.style.display = 'none'; if (t === 'login') { e.style.display = 'block'; s.style.display = 'flex'; c.innerText = '👤 登录 / 注册'; a.style.background = 'var(--text-color)'; a.style.color = 'var(--bg-color)'; i.style.background = 'var(--light-gray)'; i.style.color = 'var(--text-color)'; } else if (t === 'register') { n.style.display = 'block'; s.style.display = 'flex'; c.innerText = '👤 登录 / 注册'; i.style.background = 'var(--text-color)'; i.style.color = 'var(--bg-color)'; a.style.background = 'var(--light-gray)'; a.style.color = 'var(--text-color)'; } }
-function saveNewItem() { let t = document.getElementById('habitInput').value.trim(); if (!t) { showCustomConfirm(translate('hintTitle'), translate('inputNameHint'), translate('okBtn'), false, null); return; } let reminderVal = document.getElementById('habitReminder').value, delayHours = 0; if (reminderVal === 'custom') { const raw = document.getElementById('habitCustomHours').value; delayHours = parseFloat(raw); if (!isFinite(delayHours) || delayHours <= 0) { showToast(translate('invalidReminderHours'), 2500); return; } } else { delayHours = parseFloat(reminderVal) || 0; } let n = ICON_POOL[Math.floor(Math.random() * ICON_POOL.length)], newHabitId = uid(); if (currentTab === 'calendar') { longTermProjects.push({ id: newHabitId, name: t, icon: n, color: DEFAULT_COLOR, checkins: [] }); } else { habits.push({ id: newHabitId, name: t, icon: n, checked: false, createdAt: getTodayStr(), completedAt: null, delayHours: delayHours }); if (delayHours > 0) { requestNotifyPermission(); scheduleReminder(newHabitId, t, delayHours); } } resetReminderSelector(); closeAddModal(); saveData(); currentTab === 'calendar' ? renderCalendar() : renderHabits(); }
+// ============ Emoji 面板 ============
+let _selectedEmoji = CONFIG.BUSINESS.DEFAULT_ICON;
+function renderEmojiPanel() {
+  const grid = document.getElementById('emojiGrid');
+  if (!grid) return;
+  const emojis = CONFIG.EMOJI_CATEGORIES['常用'] || CONFIG.BUSINESS.ICON_POOL;
+  grid.innerHTML = emojis.map(e =>
+    `<div class="emoji-btn ${e === _selectedEmoji ? 'active' : ''}" data-emoji="${e}" onclick="selectEmoji('${e}')">${e}</div>`
+  ).join('');
+  document.getElementById('emojiPreview').innerText = _selectedEmoji;
+}
+function selectEmoji(emoji) {
+  _selectedEmoji = emoji;
+  document.getElementById('emojiPreview').innerText = emoji;
+  document.querySelectorAll('.emoji-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.emoji === emoji);
+  });
+}
+// 让 Emoji 预览区也可以被点击直接输入
+function openAddModal() {
+  document.getElementById('modalTitle').innerText = currentTab === 'calendar' ? translate('addLongProject') : translate('addShortTask');
+  let input = document.getElementById('habitInput');
+  input.value = '';
+  resetReminderSelector();
+  _selectedEmoji = ICON_POOL[Math.floor(Math.random() * ICON_POOL.length)];
+  document.getElementById('reminderSection').style.display = (currentTab === 'calendar') ? 'none' : 'block';
+  document.getElementById('emojiPickerSection').style.display = 'block';
+  renderEmojiPanel();
+  document.getElementById('addModal').style.display = 'flex';
+  setTimeout(() => input.focus(), 300);
+  window.location.hash = '#modal';
+}
+
+function saveNewItem() {
+  let t = document.getElementById('habitInput').value.trim();
+  if (!t) { showCustomConfirm(translate('hintTitle'), translate('inputNameHint'), translate('okBtn'), false, null); return; }
+  let reminderVal = document.getElementById('habitReminder').value, delayHours = 0;
+  if (reminderVal === 'custom') {
+    const raw = document.getElementById('habitCustomHours').value;
+    delayHours = parseFloat(raw);
+    if (!isFinite(delayHours) || delayHours <= 0) { showToast(translate('invalidReminderHours'), 2500); return; }
+  } else { delayHours = parseFloat(reminderVal) || 0; }
+  let finalIcon = _selectedEmoji || CONFIG.BUSINESS.DEFAULT_ICON;
+  // 如果用户直接在名字里输入了 emoji，提取第一个作为图标
+  const inputText = t;
+  const emojiMatch = inputText.match(/[\p{Emoji_Presentation}\p{Extended_Pictographic}]/u);
+  if (emojiMatch && !_selectedEmoji) finalIcon = emojiMatch[0];
+
+  let newHabitId = uid();
+  if (currentTab === 'calendar') {
+    longTermProjects.push({ id: newHabitId, name: t, icon: finalIcon, color: DEFAULT_COLOR, checkins: [] });
+  } else {
+    habits.push({ id: newHabitId, name: t, icon: finalIcon, checked: false, createdAt: getTodayStr(), completedAt: null, delayHours: delayHours });
+    if (delayHours > 0) { requestNotifyPermission(); scheduleReminder(newHabitId, t, delayHours); }
+  }
+  resetReminderSelector();
+  closeAddModal();
+  saveData();
+  currentTab === 'calendar' ? renderCalendar() : renderHabits();
+}
+
+// ============ 撤销打卡 ============
+let _undoTimer = null, _undoStack = [];
+function toggleHabit(id) {
+  const habit = habits.find(h => h.id === id);
+  if (!habit) return;
+  const wasChecked = habit.checked;
+  const today = getTodayStr();
+
+  habits = habits.map(h => {
+    if (h.id === id) {
+      const nowChecked = !wasChecked;
+      if (nowChecked && h.delayHours > 0) cancelReminder(h.id);
+      return { ...h, checked: nowChecked, completedAt: nowChecked ? today : null };
+    }
+    return h;
+  });
+  saveData();
+  renderHabits();
+
+  // 只在"完成打卡"时显示撤销
+  if (!wasChecked) {
+    _pushUndo(() => {
+      habits = habits.map(h => h.id === id ? { ...h, checked: false, completedAt: null } : h);
+      saveData();
+      renderHabits();
+      showToast('↩️ 已撤销');
+    }, habit.name);
+  }
+}
+function _pushUndo(undoFn, habitName) {
+  clearTimeout(_undoTimer);
+  const msg = `✅ 已打卡 · ${habitName || ''}`;
+  showUndoToast(msg, undoFn);
+}
+function showUndoToast(message, undoFn) {
+  let el = document.getElementById('_undoToast');
+  if (el) el.remove();
+  el = document.createElement('div');
+  el.id = '_undoToast';
+  el.style.cssText = 'position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.9);color:#fff;padding:12px 20px;border-radius:12px;z-index:99999;display:flex;gap:14px;align-items:center;box-shadow:0 6px 20px rgba(0,0,0,.3);max-width:85vw;opacity:0;transition:opacity .25s;font-size:14px;';
+  el.innerHTML = `<span>${escapeHtml(message)}</span><span class="undo-btn" id="_undoBtn">撤销</span>`;
+  document.body.appendChild(el);
+  requestAnimationFrame(() => { el.style.opacity = '1'; });
+  el.querySelector('#_undoBtn').onclick = () => {
+    undoFn();
+    el.remove();
+    clearTimeout(_undoTimer);
+  };
+  _undoTimer = setTimeout(() => {
+    el.style.opacity = '0';
+    setTimeout(() => el.remove(), 250);
+  }, CONFIG.BUSINESS.UNDO_TIMEOUT_MS);
+}
 function saveEditShortTerm() { let t = habits.find(e => e.id === currentEditingId); if (!t) return; let e = document.getElementById('editShortTermName').value.trim(); if (!e) { showCustomConfirm(translate('hintTitle'), translate('nameEmptyHint'), translate('okBtn'), false, null); return; } t.name = e; t.icon = document.getElementById('editShortTermIcon').value.trim() || DEFAULT_ICON; closeEditShortTermModal(); saveData(); renderHabits(); }
 function confirmDateCheck() { if (longTermProjects.length === 0) { showCustomConfirm(translate('hintTitle'), translate('noLongTermHint'), translate('okBtn'), false, null); return; } let t = selectedProjectIdForCheckin; if (!t) { showCustomConfirm(translate('hintTitle'), translate('selectProjectHint'), translate('okBtn'), false, null); return; } let e = longTermProjects.find(n => n.id === t); if (!e) return; let n = e.checkins.includes(selectedDateStr); if (n) e.checkins.splice(e.checkins.indexOf(selectedDateStr), 1); else { e.checkins.push(selectedDateStr); e.checkins.sort((o, a) => o.localeCompare(a)); } closeDateCheck(); saveData(); renderCalendar(); }
 function deleteShortTermItem() { let t = currentEditingId; if (!t) return; showCustomConfirm(translate('deleteTitle'), translate('deleteShortMsg'), translate('deleteBtn'), true, () => { habits = habits.filter(e => e.id !== t); closeEditShortTermModal(); saveData(); renderHabits(); }); }
@@ -681,15 +1044,312 @@ function changeMonth(t) { calDate.setDate(1); calDate.setMonth(calDate.getMonth(
 function getProjectStats(t) { let e = Array.isArray(t.checkins) ? t.checkins.slice().sort() : [], n = new Date(), o = `${n.getFullYear()}-${String(n.getMonth() + 1).padStart(2, '0')}`, a = e.filter(d => d.startsWith(o)).length, i = 0; if (e.length) { let s = getTodayStr(), c = new Date; c.setDate(c.getDate() - 1); let l = formatDateStr(c), d = e[e.length - 1]; if (d === s || d === l) { i = 1; for (let u = e.length - 1; u > 0; u--) { let p = new Date(e[u]).getTime(), f = new Date(e[u - 1]).getTime(); if ((p - f) / 864e5 === 1) i++; else break; } } } return { monthCount: a, streak: i, total: e.length }; }
 function openStats() { expandedStatsId = null; renderStatsPage(); document.getElementById('statsModal').style.display = 'flex'; document.getElementById('mainHeader').style.display = 'none'; document.getElementById('mainBottomNav').style.display = 'none'; window.location.hash = '#modal'; }
 function closeStats() { document.getElementById('statsModal').style.display = 'none'; expandedStatsId = null; showMainChrome(); clearHash(); }
-function renderStatsPage() { let t = new Set; longTermProjects.forEach(e => { Array.isArray(e.checkins) && e.checkins.forEach(n => t.add(n)); }); let e = Array.from(t).sort(), n = new Date(), o = `${n.getFullYear()}-${String(n.getMonth() + 1).padStart(2, '0')}`, a = e.filter(c => c.startsWith(o)).length, i = 0; longTermProjects.forEach(c => { let l = getProjectStats(c); l.streak > i && (i = l.streak); }); document.getElementById('statsMonthTotal').innerText = a; document.getElementById('statsStreakTotal').innerText = i; document.getElementById('statsProjectCount').innerText = longTermProjects.length; let s = document.getElementById('statsProjectList'); if (longTermProjects.length === 0) { s.innerHTML = `<div class="long-term-empty">${translate('noLongTerm')}</div>`; return; } let c = ''; longTermProjects.forEach(l => { let d = getProjectStats(l), u = expandedStatsId === l.id, p = l.color && COLOR_RE.test(l.color) ? l.color : DEFAULT_COLOR; c += `<div class="stats-project-item ${u ? 'expanded' : ''}" data-id="${escapeHtml(l.id)}">`; c += `<div class="stats-project-main" data-id="${escapeHtml(l.id)}"><div class="stats-project-left"><span class="stats-project-icon">${escapeHtml(l.icon || DEFAULT_ICON)}</span><span class="stats-project-name">${escapeHtml(l.name)}</span></div><div class="stats-project-right"><div class="stats-project-nums">${translate('statsThisMonth')} <b>${d.monthCount}</b> · ${translate('statsStreak')} <b>${d.streak}</b></div><div class="stats-project-nums">${translate('statsTotal')} <b>${d.total}</b></div></div><div class="stats-expand-icon">${u ? '▲' : '▼'}</div></div>`; if (u) { c += '<div class="stats-project-edit">'; c += `<div class="stats-edit-label">${translate('statsEditName')}</div><input type="text" class="stats-edit-input stats-edit-name" value="${escapeHtml(l.name)}" autocomplete="off">`; c += `<div class="stats-edit-label">${translate('statsEditIcon')}</div><input type="text" class="stats-edit-input stats-edit-icon" value="${escapeHtml(l.icon || '')}" placeholder="🏃" autocomplete="off">`; c += `<div class="stats-edit-label">${translate('statsEditColor')}</div><input type="hidden" class="stats-edit-color-value" value="${escapeHtml(p)}"><div class="stats-edit-colors">`; COLOR_PALETTE.forEach(f => { let g = f.toLowerCase() === p.toLowerCase(); c += `<div class="color-option ${g ? 'active' : ''}" data-color="${f}" style="background:${f}"></div>`; }); c += '</div>'; c += `<div class="stats-edit-label">${translate('statsEditDays')}</div><div class="stats-edit-days"><button class="spinner-btn stats-edit-spinner" data-step="-1">−</button><input type="number" class="days-input stats-edit-days-input" value="${d.total}" min="0"><button class="spinner-btn stats-edit-spinner" data-step="1">+</button></div>`; c += `<div class="stats-edit-btns"><button class="stats-edit-btn delete" data-id="${escapeHtml(l.id)}">${translate('statsEditDelete')}</button><button class="stats-edit-btn save" data-id="${escapeHtml(l.id)}">${translate('statsEditSave')}</button></div></div>`; } c += '</div>'; }); s.innerHTML = c; }
+function renderStatsPage() {
+  // 收集所有打卡日期
+  let allDates = new Set();
+  longTermProjects.forEach(p => { Array.isArray(p.checkins) && p.checkins.forEach(d => allDates.add(d)); });
+  let dateArr = Array.from(allDates).sort();
+  let now = new Date();
+  let thisMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+  let monthTotal = dateArr.filter(d => d.startsWith(thisMonth)).length;
+
+  // 找出最大连续打卡
+  let maxStreak = 0;
+  longTermProjects.forEach(p => { maxStreak = Math.max(maxStreak, getProjectStats(p).streak); });
+
+  // 🔥 连续打卡大卡
+  const heroNum = maxStreak;
+  document.getElementById('statsMonthTotal').innerText = monthTotal;
+  document.getElementById('statsStreakTotal').innerText = maxStreak;
+  document.getElementById('statsProjectCount').innerText = longTermProjects.length;
+
+  document.getElementById('streakHeroNum').innerText = heroNum;
+  let heroLabel, heroSub;
+  if (heroNum === 0) {
+    heroLabel = '开始打卡吧';
+    heroSub = '今天就是新的开始 ✨';
+  } else if (heroNum < 7) {
+    heroLabel = heroNum + ' 天连续打卡';
+    heroSub = '坚持一周就能养成习惯 🎯';
+  } else if (heroNum < 30) {
+    heroLabel = heroNum + ' 天连续打卡';
+    heroSub = '太棒了！继续保持 💪';
+  } else if (heroNum < 100) {
+    heroLabel = heroNum + ' 天 🔥';
+    heroSub = '你已坚持 ' + Math.floor(heroNum / 30) + ' 个月！';
+  } else {
+    heroLabel = heroNum + ' 天 🏆';
+    heroSub = '传奇打卡人！你做到了！';
+  }
+  document.getElementById('streakHeroLabel').innerText = heroLabel;
+  document.getElementById('streakHeroSub').innerText = heroSub;
+
+  // 📅 热力图（近 12 周，每周 7 天）
+  renderHeatmap(allDates);
+
+  // 项目列表
+  let projectListEl = document.getElementById('statsProjectList');
+  if (longTermProjects.length === 0) {
+    projectListEl.innerHTML = `<div class="long-term-empty">${translate('noLongTerm')}</div>`;
+    return;
+  }
+  let c = '';
+  longTermProjects.forEach(l => {
+    let d = getProjectStats(l), u = expandedStatsId === l.id, p = l.color && COLOR_RE.test(l.color) ? l.color : DEFAULT_COLOR;
+    c += `<div class="stats-project-item ${u ? 'expanded' : ''}" data-id="${escapeHtml(l.id)}">`;
+    c += `<div class="stats-project-main" data-id="${escapeHtml(l.id)}"><div class="stats-project-left"><span class="stats-project-icon">${escapeHtml(l.icon || DEFAULT_ICON)}</span><span class="stats-project-name">${escapeHtml(l.name)}</span></div><div class="stats-project-right"><div class="stats-project-nums">${translate('statsThisMonth')} <b>${d.monthCount}</b> · ${translate('statsStreak')} <b>${d.streak}</b></div><div class="stats-project-nums">${translate('statsTotal')} <b>${d.total}</b></div></div><div class="stats-expand-icon">${u ? '▲' : '▼'}</div></div>`;
+    if (u) {
+      c += '<div class="stats-project-edit">';
+      c += `<div class="stats-edit-label">${translate('statsEditName')}</div><input type="text" class="stats-edit-input stats-edit-name" value="${escapeHtml(l.name)}" autocomplete="off">`;
+      c += `<div class="stats-edit-label">${translate('statsEditIcon')}</div><input type="text" class="stats-edit-input stats-edit-icon" value="${escapeHtml(l.icon || '')}" placeholder="🏃" autocomplete="off">`;
+      c += `<div class="stats-edit-label">${translate('statsEditColor')}</div><input type="hidden" class="stats-edit-color-value" value="${escapeHtml(p)}"><div class="stats-edit-colors">`;
+      COLOR_PALETTE.forEach(f => { let g = f.toLowerCase() === p.toLowerCase(); c += `<div class="color-option ${g ? 'active' : ''}" data-color="${f}" style="background:${f}"></div>`; });
+      c += '</div>';
+      c += `<div class="stats-edit-label">${translate('statsEditDays')}</div><div class="stats-edit-days"><button class="spinner-btn stats-edit-spinner" data-step="-1">−</button><input type="number" class="days-input stats-edit-days-input" value="${d.total}" min="0"><button class="spinner-btn stats-edit-spinner" data-step="1">+</button></div>`;
+      c += `<div class="stats-edit-btns"><button class="stats-edit-btn delete" data-id="${escapeHtml(l.id)}">${translate('statsEditDelete')}</button><button class="stats-edit-btn save" data-id="${escapeHtml(l.id)}">${translate('statsEditSave')}</button></div></div>`;
+    }
+    c += '</div>';
+  });
+  projectListEl.innerHTML = c;
+}
+
+function renderHeatmap(allDates) {
+  const grid = document.getElementById('heatmapGrid');
+  if (!grid) return;
+  const heatDates = new Set(allDates);
+  const WEEKS = 12;
+  const DAY_NAMES = ['日', '一', '二', '三', '四', '五', '六'];
+
+  // 从今天往回构建
+  const endOfWeek = new Date();
+  // 找到本周日
+  const dow = endOfWeek.getDay();
+  endOfWeek.setDate(endOfWeek.getDate() + (6 - dow));
+
+  let weeksHtml = '';
+  for (let w = 0; w < WEEKS; w++) {
+    let weekHtml = '';
+    let weekDate = new Date(endOfWeek);
+    weekDate.setDate(weekDate.getDate() - (WEEKS - 1 - w) * 7);
+
+    for (let d = 0; d < 7; d++) {
+      const dateStr = formatDateStr(weekDate);
+      const hasCheckin = heatDates.has(dateStr);
+      const today = getTodayStr();
+      const isFuture = dateStr > today;
+      const cell = document.createElement('div');
+      let bg;
+      if (isFuture) bg = 'var(--light-gray)';
+      else if (hasCheckin) bg = '#ff4500';
+      else bg = 'var(--progress-bg)';
+      weekHtml += `<div class="heatmap-cell" style="background:${bg}" title="${DAY_NAMES[weekDate.getDay()]} ${dateStr}${hasCheckin ? ' ✓' : ''}"></div>`;
+      weekDate.setDate(weekDate.getDate() + 1);
+    }
+    weeksHtml += `<div class="heatmap-week">${weekHtml}</div>`;
+  }
+  grid.innerHTML = weeksHtml;
+}
 function saveStatsInlineEdit(t) { let e = document.querySelector(`.stats-project-item[data-id="${t}"]`); if (!e) return; let n = longTermProjects.find(s => s.id === t); if (!n) return; let o = e.querySelector('.stats-edit-name').value.trim(); if (!o) { showToast(translate('nameEmptyHint')); return; } let a = e.querySelector('.stats-edit-icon').value.trim() || DEFAULT_ICON, i = e.querySelector('.stats-edit-color-value').value, s = e.querySelector('.stats-edit-days-input').value.trim(); if (s === '') { showToast(translate('invalidDaysHint')); return; } let c = parseInt(s, 10); if (isNaN(c) || c < 0) { showToast(translate('invalidDaysHint')); return; } n.name = o; n.icon = a; n.color = COLOR_RE.test(i) ? i : DEFAULT_COLOR; if (c < n.checkins.length) { showCustomConfirm(translate('warning'), translate('reduceDaysWarn'), translate('okBtn'), true, () => { applyDaysChange(n, c); saveData(); expandedStatsId = null; renderStatsPage(); renderCalendar(); }); } else { applyDaysChange(n, c); saveData(); expandedStatsId = null; renderStatsPage(); renderCalendar(); } }
 function confirmDeleteLongFromStats(t) { showCustomConfirm(translate('deleteTitle'), translate('deleteLongMsg'), translate('deleteBtn'), true, () => { longTermProjects = longTermProjects.filter(e => e.id !== t); saveData(); expandedStatsId = null; renderStatsPage(); renderCalendar(); }); }
 function applyDaysChange(t, e) { let n = t.checkins.length; if (e === n) return; if (e > n) { let o = e - n, a = new Set(t.checkins), i = new Date, s = 0, c = 0; for (; s < o && c < MAX_FILL_DAYS;) { let l = formatDateStr(i); a.has(l) || (t.checkins.push(l), a.add(l), s++), i.setDate(i.getDate() - 1), c++; } s < o && showToast(translate('fillLimitHint'), 3000), t.checkins.sort((l, d) => l.localeCompare(d)); } else t.checkins.sort((o, a) => o.localeCompare(a)), t.checkins = t.checkins.slice(t.checkins.length - e); }
 function renderCalendar() { let t = calDate.getFullYear(), e = calDate.getMonth(); document.getElementById('calTitle').innerText = formatYearMonth(t, e + 1); let n = 0, o = (new Date(t, e, 1).getDay() - n + 7) % 7, a = new Date(t, e + 1, 0).getDate(), i = `${t}-${String(e + 1).padStart(2, '0')}`, s = ''; for (let c = 0; c < o; c++) s += '<div class="cal-day"></div>'; const todayStr = getTodayStr(); for (let c = 1; c <= a; c++) { let l = `${i}-${String(c).padStart(2, '0')}`, d = longTermProjects.filter(f => Array.isArray(f.checkins) && f.checkins.includes(l)).map(f => f.color && COLOR_RE.test(f.color) ? f.color : DEFAULT_COLOR), u = d.length > 0, p = ''; if (u) { if (d.length === 1) { let f = d[0], g = f === DEFAULT_COLOR ? 'background-color:var(--text-color);border-color:var(--text-color);' : `background-color:${f};border-color:${f};`; p = `<div class="cal-dot" style="${g}"></div>`; } else { p = `<div class="cal-dot multi">${d.length}</div>`; } } const futureCls = l > todayStr ? ' future' : ''; s += `<div class="cal-day ${u ? 'has-dot' : ''}${futureCls}"><div class="cal-inner" data-date="${l}"><span class="cal-date-num">${c}</span><div class="cal-border-placeholder"></div>${p}</div></div>`; } document.getElementById('calendarGrid').innerHTML = s; renderLongTermProjects(); }
 function renderLongTermProjects() { let t = document.getElementById('longTermContainer'); if (longTermProjects.length === 0) { t.innerHTML = `<div class="long-term-empty">${translate('noLongTerm')}</div>`; return; } let e = ''; longTermProjects.forEach(n => { let o = Array.isArray(n.checkins) ? n.checkins.length : 0; e += `<div class="project-item" data-project-id="${escapeHtml(n.id)}"><div class="project-left"><span class="project-icon">${escapeHtml(n.icon || DEFAULT_ICON)}</span><span class="project-name">${escapeHtml(n.name)}</span></div><div class="project-right"><span class="project-days">${translate('projectDays', { n: o })}</span></div></div>`; }); t.innerHTML = e; }
 function getArchiveCutoff() { let t = new Date; return t.setDate(t.getDate() - 7), formatDateStr(t); }
-function renderHabits() { let t = getArchiveCutoff(), e = habits.filter(c => !c.checked), n = habits.filter(c => c.checked && (!c.completedAt || c.completedAt >= t)), o = habits.filter(c => c.checked && c.completedAt && c.completedAt < t), a = habits.length, i = habits.filter(c => c.checked).length; document.getElementById('progressText').innerText = `${i}/${a}`; document.getElementById('progressFill').style.width = a > 0 ? `${i / a * 100}%` : '0%'; if (a === 0) { document.getElementById('emptyNum').innerText = '0'; document.getElementById('emptyText').innerText = translate('noHabits', { n: 0 }); document.getElementById('emptyState').style.display = 'flex'; document.getElementById('listState').style.display = 'none'; return; } else { document.getElementById('emptyState').style.display = 'none'; document.getElementById('listState').style.display = 'flex'; } function s(c, l, d, u, p) { let f = document.getElementById(c); if (!f) return; if (p = p || {}, l.length === 0) { f.innerHTML = `<div class="task-group-title">${u}</div>`; return; } let g = `<div class="task-group-title">${d}</div><div class="task-group-divider"></div>`; l.forEach(h => { let b = p.showCompletedAt && h.completedAt ? `${translate('completedOn', { d: formatShortDate(h.completedAt) })}` : translate('todayTask'); g += `<div class="habit-item"><div class="habit-left" data-action="edit" data-id="${escapeHtml(h.id)}"><span class="habit-icon">${escapeHtml(h.icon)}</span><div><div class="habit-name">${escapeHtml(h.name)}</div><div class="habit-desc">${b}</div></div></div><div class="habit-right"><div class="checkbox ${h.checked ? 'active' : ''}" data-action="toggle" data-id="${escapeHtml(h.id)}"><div class="check-dot"></div></div><div class="delete-btn" data-action="delete" data-id="${escapeHtml(h.id)}">×</div></div></div>`; }); f.innerHTML = g; } s('pendingTasks', e, translate('pending'), translate('noPendingTasks'), {}); s('completedTasks', n, translate('completed'), translate('noCompletedTasks'), { showCompletedAt: true }); s('unprocessedTasks', o, translate('archived'), translate('noArchivedTasks'), { showCompletedAt: true }); }
-function setupDelegation() { ['pendingTasks', 'completedTasks', 'unprocessedTasks'].forEach(t => { let e = document.getElementById(t); if (!e || e.dataset.bound) return; e.dataset.bound = '1'; e.addEventListener('click', n => { let o = n.target.closest('[data-action]'); if (!o || !e.contains(o)) return; let a = o.dataset.action, i = o.dataset.id; if (i) { if (a === 'toggle') toggleHabit(i); else if (a === 'delete') confirmDeleteHabit(i); else if (a === 'edit') openEditShortTerm(i); } }); }); let calGrid = document.getElementById('calendarGrid'); if (calGrid && !calGrid.dataset.bound) { calGrid.dataset.bound = '1'; calGrid.addEventListener('click', e => { let inner = e.target.closest('.cal-inner'); if (inner && inner.dataset.date) openDateCheck(inner.dataset.date); }); } let projList = document.getElementById('projectOptionList'); if (projList && !projList.dataset.bound) { projList.dataset.bound = '1'; projList.addEventListener('click', e => { let opt = e.target.closest('[data-project-id]'); if (opt) selectProject(opt.dataset.projectId); }); } let statsList = document.getElementById('statsProjectList'); if (statsList && !statsList.dataset.bound) { statsList.dataset.bound = '1'; statsList.addEventListener('click', e => { let main = e.target.closest('.stats-project-main'); if (main) { let id = main.dataset.id; expandedStatsId = expandedStatsId === id ? null : id; renderStatsPage(); return; } let color = e.target.closest('.stats-edit-colors .color-option'); if (color) { let box = color.closest('.stats-edit-colors'); box.querySelectorAll('.color-option').forEach(el => el.classList.remove('active')); color.classList.add('active'); color.closest('.stats-project-item').querySelector('.stats-edit-color-value').value = color.dataset.color; return; } let spinner = e.target.closest('.stats-edit-spinner'); if (spinner) { let step = parseInt(spinner.dataset.step, 10); let item = spinner.closest('.stats-project-item'); let input = item.querySelector('.stats-edit-days-input'); let val = parseInt(input.value, 10); if (isNaN(val)) val = 0; val += step; if (val < 0) val = 0; input.value = val; return; } let del = e.target.closest('.stats-edit-btn.delete'); if (del) { confirmDeleteLongFromStats(del.dataset.id); return; } let save = e.target.closest('.stats-edit-btn.save'); if (save) { saveStatsInlineEdit(save.dataset.id); return; } }); } }
+function renderHabits() {
+  let t = getArchiveCutoff();
+  let e = habits.filter(c => !c.checked);
+  let n = habits.filter(c => c.checked && (!c.completedAt || c.completedAt >= t));
+  let o = habits.filter(c => c.checked && c.completedAt && c.completedAt < t);
+  let a = habits.length, i = habits.filter(c => c.checked).length;
+
+  document.getElementById('progressText').innerText = `${i}/${a}`;
+  document.getElementById('progressFill').style.width = a > 0 ? `${i / a * 100}%` : '0%';
+
+  if (a === 0) {
+    document.getElementById('emptyNum').innerText = '0';
+    document.getElementById('emptyText').innerText = translate('noHabits', { n: 0 });
+    document.getElementById('emptyState').style.display = 'flex';
+    document.getElementById('listState').style.display = 'none';
+    return;
+  } else {
+    document.getElementById('emptyState').style.display = 'none';
+    document.getElementById('listState').style.display = 'flex';
+  }
+
+  function renderGroup(elId, items, emptyText, groupTitle, opts) {
+    let container = document.getElementById(elId);
+    if (!container) return;
+    opts = opts || {};
+    if (items.length === 0) {
+      container.innerHTML = `<div class="task-group-title">${groupTitle}</div><div class="habit-item" style="opacity:.5;text-align:center;font-weight:400;color:var(--sub-text);justify-content:center;">${emptyText}</div>`;
+      return;
+    }
+    let html = `<div class="task-group-title">${groupTitle}</div><div class="task-group-divider"></div>`;
+    items.forEach((h, idx) => {
+      let descText = opts.showCompletedAt && h.completedAt
+        ? `${translate('completedOn', { d: formatShortDate(h.completedAt) })}`
+        : translate('todayTask');
+      html += `
+        <div class="habit-item" draggable="true" data-id="${escapeHtml(h.id)}" data-index="${habits.findIndex(x => x.id === h.id)}">
+          <div class="drag-handle" data-drag-handle title="拖动排序">⋮⋮</div>
+          <div class="habit-left" data-action="edit" data-id="${escapeHtml(h.id)}">
+            <span class="habit-icon">${escapeHtml(h.icon)}</span>
+            <div>
+              <div class="habit-name">${escapeHtml(h.name)}</div>
+              <div class="habit-desc">${descText}</div>
+            </div>
+          </div>
+          <div class="habit-right">
+            <div class="checkbox ${h.checked ? 'active' : ''}" data-action="toggle" data-id="${escapeHtml(h.id)}">
+              <div class="check-dot"></div>
+            </div>
+            <div class="edit-btn" data-action="edit" data-id="${escapeHtml(h.id)}" title="编辑">✎</div>
+            <div class="delete-btn" data-action="delete" data-id="${escapeHtml(h.id)}" title="删除">×</div>
+          </div>
+        </div>`;
+    });
+    container.innerHTML = html;
+  }
+  renderGroup('pendingTasks', e, translate('noPendingTasks'), translate('pending'), {});
+  renderGroup('completedTasks', n, translate('noCompletedTasks'), translate('completed'), { showCompletedAt: true });
+  renderGroup('unprocessedTasks', o, translate('noArchivedTasks'), translate('archived'), { showCompletedAt: true });
+}
+function setupDelegation() {
+  // 点击事件委托（toggle/delete/edit）
+  ['pendingTasks', 'completedTasks', 'unprocessedTasks'].forEach(t => {
+    let e = document.getElementById(t);
+    if (!e || e.dataset.bound) return;
+    e.dataset.bound = '1';
+    e.addEventListener('click', n => {
+      let o = n.target.closest('[data-action]');
+      if (!o || !e.contains(o)) return;
+      let a = o.dataset.action, i = o.dataset.id;
+      if (i) { if (a === 'toggle') toggleHabit(i); else if (a === 'delete') confirmDeleteHabit(i); else if (a === 'edit') openEditShortTerm(i); }
+    });
+    // 拖拽排序
+    setupDragSort(e);
+  });
+  let calGrid = document.getElementById('calendarGrid');
+  if (calGrid && !calGrid.dataset.bound) {
+    calGrid.dataset.bound = '1';
+    calGrid.addEventListener('click', e => { let inner = e.target.closest('.cal-inner'); if (inner && inner.dataset.date) openDateCheck(inner.dataset.date); });
+  }
+  let projList = document.getElementById('projectOptionList');
+  if (projList && !projList.dataset.bound) {
+    projList.dataset.bound = '1';
+    projList.addEventListener('click', e => { let opt = e.target.closest('[data-project-id]'); if (opt) selectProject(opt.dataset.projectId); });
+  }
+  let statsList = document.getElementById('statsProjectList');
+  if (statsList && !statsList.dataset.bound) {
+    statsList.dataset.bound = '1';
+    statsList.addEventListener('click', e => {
+      let main = e.target.closest('.stats-project-main');
+      if (main) { let id = main.dataset.id; expandedStatsId = expandedStatsId === id ? null : id; renderStatsPage(); return; }
+      let color = e.target.closest('.stats-edit-colors .color-option');
+      if (color) { let box = color.closest('.stats-edit-colors'); box.querySelectorAll('.color-option').forEach(el => el.classList.remove('active')); color.classList.add('active'); color.closest('.stats-project-item').querySelector('.stats-edit-color-value').value = color.dataset.color; return; }
+      let spinner = e.target.closest('.stats-edit-spinner');
+      if (spinner) { let step = parseInt(spinner.dataset.step, 10); let item = spinner.closest('.stats-project-item'); let input = item.querySelector('.stats-edit-days-input'); let val = parseInt(input.value, 10); if (isNaN(val)) val = 0; val += step; if (val < 0) val = 0; input.value = val; return; }
+      let del = e.target.closest('.stats-edit-btn.delete');
+      if (del) { confirmDeleteLongFromStats(del.dataset.id); return; }
+      let save = e.target.closest('.stats-edit-btn.save');
+      if (save) { saveStatsInlineEdit(save.dataset.id); return; }
+    });
+  }
+}
+
+// ============ 拖拽排序（HTML5 DnD + Touch fallback）============
+function setupDragSort(container) {
+  if (!container) return;
+  let dragSrcEl = null;
+
+  container.addEventListener('dragstart', e => {
+    const item = e.target.closest('.habit-item');
+    if (!item || !e.target.closest('.drag-handle')) { e.preventDefault(); return; }
+    dragSrcEl = item;
+    item.classList.add('dragging');
+    e.dataTransfer.effectAllowed = 'move';
+    try { e.dataTransfer.setData('text/plain', item.dataset.id); } catch(_) {}
+  });
+  container.addEventListener('dragend', e => {
+    if (dragSrcEl) dragSrcEl.classList.remove('dragging');
+    container.querySelectorAll('.habit-item').forEach(el => el.classList.remove('drag-over'));
+    dragSrcEl = null;
+  });
+  container.addEventListener('dragover', e => {
+    e.preventDefault();
+    const item = e.target.closest('.habit-item');
+    if (!item || item === dragSrcEl) return;
+    container.querySelectorAll('.habit-item').forEach(el => el.classList.remove('drag-over'));
+    item.classList.add('drag-over');
+    e.dataTransfer.dropEffect = 'move';
+  });
+  container.addEventListener('dragleave', e => {
+    const item = e.target.closest('.habit-item');
+    if (item) item.classList.remove('drag-over');
+  });
+  container.addEventListener('drop', e => {
+    e.preventDefault();
+    const target = e.target.closest('.habit-item');
+    if (!target || !dragSrcEl || target === dragSrcEl) return;
+    const srcId = dragSrcEl.dataset.id;
+    const tgtId = target.dataset.id;
+    reorderHabits(srcId, tgtId);
+  });
+
+  // Touch fallback for mobile
+  let touchSrc = null, touchClone = null;
+  container.addEventListener('touchstart', e => {
+    if (!e.target.closest('.drag-handle')) return;
+    const item = e.target.closest('.habit-item');
+    if (!item) return;
+    touchSrc = item;
+    item.classList.add('dragging');
+    touchClone = item.cloneNode(true);
+    touchClone.style.cssText = 'position:fixed;pointer-events:none;opacity:.7;z-index:99998;transform:scale(1.02);box-shadow:0 10px 30px rgba(0,0,0,.2);transition:none;';
+    document.body.appendChild(touchClone);
+    moveTouchClone(e);
+  }, { passive: true });
+  container.addEventListener('touchmove', e => {
+    if (!touchSrc || !touchClone) return;
+    moveTouchClone(e);
+    const touch = e.touches[0];
+    const target = document.elementFromPoint(touch.clientX, touch.clientY);
+    const targetItem = target ? target.closest('.habit-item') : null;
+    container.querySelectorAll('.habit-item').forEach(el => el.classList.remove('drag-over'));
+    if (targetItem && targetItem !== touchSrc) targetItem.classList.add('drag-over');
+  }, { passive: true });
+  container.addEventListener('touchend', e => {
+    if (!touchSrc) return;
+    const touch = (e.changedTouches && e.changedTouches[0]) || null;
+    let targetItem = null;
+    if (touch) {
+      const target = document.elementFromPoint(touch.clientX, touch.clientY);
+      targetItem = target ? target.closest('.habit-item') : null;
+    }
+    if (targetItem && targetItem !== touchSrc) {
+      reorderHabits(touchSrc.dataset.id, targetItem.dataset.id);
+    }
+    touchSrc.classList.remove('dragging');
+    container.querySelectorAll('.habit-item').forEach(el => el.classList.remove('drag-over'));
+    if (touchClone) { touchClone.remove(); touchClone = null; }
+    touchSrc = null;
+  });
+  function moveTouchClone(e) {
+    if (!touchClone || !e.touches[0]) return;
+    touchClone.style.left = (e.touches[0].clientX - touchClone.offsetWidth / 2) + 'px';
+    touchClone.style.top = (e.touches[0].clientY - touchClone.offsetHeight / 2) + 'px';
+  }
+}
+function reorderHabits(srcId, tgtId) {
+  const srcIdx = habits.findIndex(h => h.id === srcId);
+  const tgtIdx = habits.findIndex(h => h.id === tgtId);
+  if (srcIdx < 0 || tgtIdx < 0 || srcIdx === tgtIdx) return;
+  const [moved] = habits.splice(srcIdx, 1);
+  const insertAt = srcIdx < tgtIdx ? tgtIdx - 1 : tgtIdx;
+  habits.splice(insertAt, 0, moved);
+  saveData();
+  renderHabits();
+}
 
 function applyBgImage(t) { let e = document.getElementById('customBgLayer'); if (t) { e.style.display = 'block'; e.style.backgroundImage = `url(${t})`; document.getElementById('bgPreviewBox').style.backgroundImage = `url(${t})`; document.getElementById('bgPreviewBox').style.color = 'transparent'; document.getElementById('bgPreviewText').style.display = 'none'; } else { e.style.display = 'none'; document.getElementById('bgPreviewBox').style.backgroundImage = 'none'; document.getElementById('bgPreviewBox').style.color = '#aaa'; document.getElementById('bgPreviewText').style.display = 'block'; } }
 function openBgPicker() { document.getElementById('bgPickerModal').style.display = 'flex'; let t = localStorage.getItem('bgOpacity') || '0.85'; document.getElementById('bgOpacitySlider').value = t; document.getElementById('bgOpacityVal').innerText = t; window.location.hash = '#modal'; }
