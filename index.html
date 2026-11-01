@@ -198,44 +198,39 @@ body.dark-mode .long-term-empty{color:#999;}
 .reminder-option {padding: 8px 14px;border-radius: 12px;background: var(--light-gray);color: var(--text-color);font-size: 13px;font-weight: 500;cursor: pointer;border: 1.5px solid transparent;display: flex;justify-content: center;align-items: center;}
 .reminder-option.active {background: var(--text-color);color: var(--bg-color);}
 /* === Emoji 选择面板 === */
-.emoji-section{width:100%;margin-top:5px;}
-.emoji-section-label{font-size:12px;color:var(--sub-text);margin-bottom:8px;display:block;font-weight:500;}
-.emoji-selected-row{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
-.emoji-selected-preview{width:44px;height:44px;border-radius:12px;background:var(--light-gray);display:flex;justify-content:center;align-items:center;font-size:26px;flex-shrink:0;}
-.emoji-grid{display:grid;grid-template-columns:repeat(8,1fr);gap:4px;max-height:140px;overflow-y:auto;padding:6px;background:var(--light-gray);border-radius:10px;}
-.emoji-btn{font-size:20px;text-align:center;padding:6px 0;border-radius:8px;cursor:pointer;transition:all .15s;user-select:none;line-height:1;}
-.emoji-btn:active,.emoji-btn.active{background:var(--text-color);transform:scale(0.9);}
-body.dark-mode .emoji-btn:active,body.dark-mode .emoji-btn.active{color:var(--bg-color);}
-/* === 编辑按钮可见化 === */
-.edit-btn{width:28px;height:28px;border-radius:50%;background:var(--light-gray);color:var(--sub-text);font-size:16px;display:flex;justify-content:center;align-items:center;cursor:pointer;opacity:.6;transition:all .2s;}
-.edit-btn:active,.edit-btn:hover{opacity:1;color:var(--text-color);background:rgba(0,0,0,.1);}
-body.dark-mode .edit-btn:active,body.dark-mode .edit-btn:hover{background:rgba(255,255,255,.15);}
-/* === 撤销按钮 === */
-.undo-toast{display:flex;align-items:center;gap:12px;background:rgba(0,0,0,.85)!important;padding:12px 18px!important;}
-.undo-btn{color:#ffd700;font-weight:700;font-size:14px;cursor:pointer;text-decoration:underline;flex-shrink:0;}
-/* === 拖拽排序 === */
-.drag-handle{width:22px;height:22px;color:var(--sub-text);font-size:18px;display:flex;justify-content:center;align-items:center;cursor:grab;user-select:none;opacity:.4;transition:opacity .2s;flex-shrink:0;}
-.drag-handle:active{cursor:grabbing;opacity:.8;}
-.habit-item.dragging{opacity:.4;transform:scale(.98);}
-.habit-item.drag-over{border:2px dashed var(--text-color)!important;background:rgba(0,0,0,.05)!important;}
-body.dark-mode .habit-item.drag-over{background:rgba(255,255,255,.08)!important;}
-/* === 连续打卡可视化 === */
-.streak-hero{background:linear-gradient(135deg,#ff6b35,#ff9a56);border-radius:20px;padding:28px 20px;text-align:center;color:#fff;margin-bottom:20px;position:relative;overflow:hidden;box-shadow:0 8px 24px rgba(255,107,53,.3);}
-body.dark-mode .streak-hero{background:linear-gradient(135deg,#ff6b35,#ff4500);}
-.streak-hero::before{content:'🔥';position:absolute;right:-10px;bottom:-20px;font-size:100px;opacity:.2;}
-.streak-hero-num{font-size:64px;font-weight:900;line-height:1;text-shadow:0 2px 8px rgba(0,0,0,.2);}
-.streak-hero-label{font-size:14px;font-weight:600;margin-top:4px;opacity:.9;letter-spacing:2px;}
-.streak-hero-sub{font-size:12px;margin-top:6px;opacity:.8;}
-/* === 周热力图 === */
-.heatmap-section{margin-bottom:15px;}
-.heatmap-title{font-size:13px;font-weight:600;color:var(--sub-text);margin-bottom:10px;}
+.emoji-section{width:100%;margin-top:2px;}
+.emoji-section-label{font-size:12px;color:var(--sub-text);margin-bottom:6px;display:block;font-weight:500;}
+.emoji-selected-row{display:flex;align-items:center;gap:10px;margin-bottom:6px;}
+.emoji-selected-preview{width:40px;height:40px;border-radius:12px;background:var(--bg-color);backdrop-filter:blur(20px);border:1px solid var(--border-color);display:flex;justify-content:center;align-items:center;font-size:24px;flex-shrink:0;box-shadow:0 2px 8px rgba(0,0,0,.04);}
+.emoji-grid{display:grid;grid-template-columns:repeat(8,1fr);gap:3px;max-height:130px;overflow-y:auto;padding:8px;background:var(--bg-color);backdrop-filter:blur(20px);border-radius:12px;border:1px solid var(--border-color);}
+.emoji-btn{font-size:18px;text-align:center;padding:6px 0;border-radius:10px;cursor:pointer;transition:background .2s;user-select:none;line-height:1;}
+.emoji-btn:active,.emoji-btn.active{background:var(--light-gray);}
+/* === 编辑按钮（与删除按钮同体系） === */
+.edit-btn{width:22px;height:22px;border-radius:50%;background:transparent;color:var(--sub-text);font-size:14px;display:flex;justify-content:center;align-items:center;cursor:pointer;opacity:0;transition:opacity .2s;}
+.habit-item:hover .edit-btn, .habit-item:active .edit-btn, .habit-item:focus-within .edit-btn{opacity:.7;}
+.edit-btn:active{opacity:1;color:var(--text-color);}
+/* === 拖拽手柄（更低调） === */
+.drag-handle{width:18px;height:22px;color:var(--sub-text);font-size:14px;display:flex;justify-content:center;align-items:center;cursor:grab;user-select:none;opacity:0;transition:opacity .2s;flex-shrink:0;letter-spacing:0;}
+.habit-item:hover .drag-handle, .habit-item:active .drag-handle, .habit-item:focus-within .drag-handle{opacity:.35;}
+.drag-handle:active{cursor:grabbing;opacity:.7;}
+.habit-item.dragging{opacity:.45;transform:scale(.98);}
+.habit-item.drag-over{outline:1.5px solid var(--text-color);outline-offset:2px;}
+/* === 连续打卡大卡（极简黑白风） === */
+.streak-hero{background:var(--bg-color);backdrop-filter:blur(20px);border:1px solid var(--border-color);border-radius:20px;padding:24px 20px;text-align:center;color:var(--text-color);margin-bottom:16px;position:relative;box-shadow:0 4px 20px rgba(0,0,0,.06);}
+.streak-hero-num{font-size:56px;font-weight:900;line-height:1;letter-spacing:-2px;}
+.streak-hero-label{font-size:13px;font-weight:600;margin-top:4px;color:var(--sub-text);letter-spacing:1px;}
+.streak-hero-sub{font-size:11px;margin-top:4px;color:var(--sub-text);opacity:.7;}
+/* === 周热力图（极简点线） === */
+.heatmap-section{margin-bottom:14px;background:var(--bg-color);backdrop-filter:blur(20px);border-radius:16px;padding:14px;border:1px solid var(--border-color);box-shadow:0 2px 12px rgba(0,0,0,.04);}
+.heatmap-title{font-size:12px;font-weight:700;color:var(--text-color);margin-bottom:10px;letter-spacing:.5px;}
 .heatmap{display:flex;gap:3px;overflow-x:auto;padding-bottom:2px;}
 .heatmap-week{display:flex;flex-direction:column;gap:3px;}
-.heatmap-cell{width:12px;height:12px;border-radius:2px;cursor:pointer;transition:transform .15s;flex-shrink:0;}
-.heatmap-cell:active{transform:scale(1.5);}
-body.dark-mode .heatmap-cell{border:1px solid rgba(255,255,255,.1);}
-.heatmap-legend{display:flex;align-items:center;gap:4px;margin-top:8px;font-size:11px;color:var(--sub-text);}
-.heatmap-legend .heatmap-cell{width:10px;height:10px;}
+.heatmap-cell{width:10px;height:10px;border-radius:3px;transition:transform .15s, background .2s;flex-shrink:0;background:var(--light-gray);}
+.heatmap-cell:active{transform:scale(1.8);}
+.heatmap-legend{display:flex;align-items:center;gap:4px;margin-top:8px;font-size:10px;color:var(--sub-text);}
+.heatmap-legend .heatmap-cell{width:9px;height:9px;}
+body.dark-mode .heatmap-cell{background:rgba(255,255,255,.06);}
+body.dark-mode .heatmap-cell[style*="#ff4500"], body.dark-mode .heatmap-cell[style*="#ffd9b3"], body.dark-mode .heatmap-cell[style*="#ffae7a"], body.dark-mode .heatmap-cell[style*="#ff7b3a"]{background:var(--text-color)!important;}
 </style>
 </head>
 <body>
@@ -354,15 +349,14 @@ body.dark-mode .heatmap-cell{border:1px solid rgba(255,255,255,.1);}
       </div>
       <!-- 本周热力图 -->
       <div class="heatmap-section" id="heatmapSection">
-        <div class="heatmap-title">📅 近 12 周打卡热力</div>
+        <div class="heatmap-title">🗓 近 12 周打卡</div>
         <div class="heatmap" id="heatmapGrid"></div>
         <div class="heatmap-legend">
           <span>少</span>
-          <div class="heatmap-cell" style="background:var(--light-gray)"></div>
-          <div class="heatmap-cell" style="background:#ffd9b3"></div>
-          <div class="heatmap-cell" style="background:#ffae7a"></div>
-          <div class="heatmap-cell" style="background:#ff7b3a"></div>
-          <div class="heatmap-cell" style="background:#ff4500"></div>
+          <div class="heatmap-cell" style="background:var(--progress-bg)"></div>
+          <div class="heatmap-cell" style="background:rgba(0,0,0,.35)"></div>
+          <div class="heatmap-cell" style="background:rgba(0,0,0,.65)"></div>
+          <div class="heatmap-cell" style="background:var(--text-color)"></div>
           <span>多</span>
         </div>
       </div>
@@ -1005,13 +999,14 @@ function showUndoToast(message, undoFn) {
   if (el) el.remove();
   el = document.createElement('div');
   el.id = '_undoToast';
-  el.style.cssText = 'position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.9);color:#fff;padding:12px 20px;border-radius:12px;z-index:99999;display:flex;gap:14px;align-items:center;box-shadow:0 6px 20px rgba(0,0,0,.3);max-width:85vw;opacity:0;transition:opacity .25s;font-size:14px;';
-  el.innerHTML = `<span>${escapeHtml(message)}</span><span class="undo-btn" id="_undoBtn">撤销</span>`;
+  el.style.cssText = 'position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:var(--bg-color);backdrop-filter:blur(20px);color:var(--text-color);border:1px solid var(--border-color);border-radius:16px;padding:12px 18px;z-index:99999;display:flex;gap:14px;align-items:center;box-shadow:0 10px 30px rgba(0,0,0,.12);max-width:85vw;opacity:0;transition:opacity .25s;font-size:14px;font-weight:500;';
+  el.innerHTML = `<span>${escapeHtml(message)}</span><span class="undo-btn" id="_undoBtn" style="color:var(--text-color);font-weight:800;font-size:13px;cursor:pointer;padding:4px 12px;border-radius:10px;background:var(--light-gray);">撤销</span>`;
   document.body.appendChild(el);
   requestAnimationFrame(() => { el.style.opacity = '1'; });
   el.querySelector('#_undoBtn').onclick = () => {
     undoFn();
-    el.remove();
+    el.style.opacity = '0';
+    setTimeout(() => el.remove(), 250);
     clearTimeout(_undoTimer);
   };
   _undoTimer = setTimeout(() => {
@@ -1120,9 +1115,7 @@ function renderHeatmap(allDates) {
   const WEEKS = 12;
   const DAY_NAMES = ['日', '一', '二', '三', '四', '五', '六'];
 
-  // 从今天往回构建
   const endOfWeek = new Date();
-  // 找到本周日
   const dow = endOfWeek.getDay();
   endOfWeek.setDate(endOfWeek.getDate() + (6 - dow));
 
@@ -1137,10 +1130,9 @@ function renderHeatmap(allDates) {
       const hasCheckin = heatDates.has(dateStr);
       const today = getTodayStr();
       const isFuture = dateStr > today;
-      const cell = document.createElement('div');
       let bg;
       if (isFuture) bg = 'var(--light-gray)';
-      else if (hasCheckin) bg = '#ff4500';
+      else if (hasCheckin) bg = 'var(--text-color)';
       else bg = 'var(--progress-bg)';
       weekHtml += `<div class="heatmap-cell" style="background:${bg}" title="${DAY_NAMES[weekDate.getDay()]} ${dateStr}${hasCheckin ? ' ✓' : ''}"></div>`;
       weekDate.setDate(weekDate.getDate() + 1);
