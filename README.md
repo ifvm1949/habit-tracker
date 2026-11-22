@@ -1,4 +1,4 @@
-# 🧙‍♀️ 极简打卡 (Minimalist Habit Tracker)
+#  极简打卡 (Minimalist Habit Tracker)
 
 一款高颜值、仅 12MB、无广告的打卡APP 
 👉 **[🌐 体验网页版](https://ifvm1949.github.io/habit-tracker/)**
