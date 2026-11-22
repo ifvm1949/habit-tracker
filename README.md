@@ -3,7 +3,8 @@
 一款高颜值、仅 12MB、无广告的打卡APP 
 👉 **[🌐 体验网页版](https://ifvm1949.github.io/habit-tracker/)**
 
-##截图
+截图
+
 ![今日](https://github.com/ifvm1949/habit-tracker/issues/1#issue-6538721070)
 
 ![数据](https://github.com/ifvm1949/habit-tracker/issues/2#issue-6538725796)
