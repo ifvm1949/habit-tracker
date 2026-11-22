@@ -11,7 +11,7 @@
 
 ![日历](https://github.com/ifvm1949/habit-tracker/issues/3#issue-6538729265)
 
-![我的](https://github.com/ifvm1949/habit-tracker/issues/4#issue-6538732981
+![我的](https://github.com/ifvm1949/habit-tracker/issues/4#issue-6538732981)
 
 ---
 
